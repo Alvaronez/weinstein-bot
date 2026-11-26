@@ -1,0 +1,55 @@
+# Parámetros del bot Weinstein. Cada bloque cita el requisito de specs/requirements.md.
+
+universe:
+  sp500: true
+  nasdaq100: true
+  stoxx600: true            # solo señal, Alpaca no opera Europa (R-U3)
+  extra: []                 # tickers de Yahoo adicionales, p. ej. ["PLTR"]
+  min_weeks: 60             # R-U4
+
+benchmark:
+  us: SPY                   # también referencia del alfa
+  eu: "^STOXX"
+
+stages:                     # R-F
+  ma_weeks: 30
+  slope_weeks: 4
+  flat_threshold: 0.005     # ±0,5 % en 4 semanas = media plana
+  rs_weeks: 52
+  vol_weeks: 4
+
+resistance:                 # R-R
+  lookback_weeks: 104
+  pivot_window: 3
+  zone_tolerance: 0.03
+  min_base_weeks: 3
+
+entry:                      # R-E
+  min_weeks_in_stage2: 4
+  max_extension: 0.25       # máx. sobre la MM30
+  max_breakout_distance: 0.08
+  trigger_buffer: 0.005
+  limit_buffer: 0.03
+  min_reward_risk: 2.0
+  max_stop_distance: 0.15
+  min_price: 5.0
+
+risk:                       # R-E5
+  risk_per_trade: 0.01
+  max_position_pct: 0.10
+  max_positions: 15
+
+stops:                      # R-S
+  buffer: 0.01
+  swing_window: 2
+  fallback_pct: 0.08        # solo si el guardián encuentra una posición sin stop previsto
+
+weakness:                   # R-D
+  stage3_reduce: 0.50
+  rs_negative_weeks: 2
+  rs_negative_reduce: 0.25
+  breakout_volume_mult: 1.5
+  no_volume_reduce: 0.50
+
+alpaca:
+  base_url: https://paper-api.alpaca.markets   # cuenta paper
