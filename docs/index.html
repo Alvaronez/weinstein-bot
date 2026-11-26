@@ -182,10 +182,6 @@ fetch("data.json?" + Date.now()).then(r => r.json()).then(d => {
   table("orders", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
     { h: "Orden", f: r => esc(r.kind) },
-    { h: "Títulos", n: 1, f: r => num(r.qty, 0) },
-    { h: "Stop", n: 1, f: r => num(r.stop_price) },
-    { h: "Límite", n: 1, f: r => num(r.limit_price) },
-    { h: "Estado", f: r => `<span class="chip">${esc(r.status === "held" ? "en espera" : "activa")}</span>` },
     { h: "Motivo", f: r => esc(r.reason) },
   ], d.orders, "No hay órdenes vivas.");
 
