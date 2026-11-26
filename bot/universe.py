@@ -10,7 +10,7 @@ from .config import ROOT
 UA = {"User-Agent": "Mozilla/5.0 (weinstein-bot; uso personal)"}
 WIKI = {
     "sp500": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-    "nasdaq100": "https://en.wikipedia.org/wiki/Nasdaq-100",
+    "nasdaq100": "https://en.wikipedia.org/wiki/List_of_NASDAQ-100_companies",
 }
 SP500_ALT = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 
