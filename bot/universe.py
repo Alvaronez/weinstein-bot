@@ -24,7 +24,8 @@ def _from_wikipedia(url: str) -> list[str]:
             name = " ".join(map(str, col)) if isinstance(col, tuple) else str(col)
             if "symbol" in name.lower() or "ticker" in name.lower():
                 return [str(s).strip().replace(".", "-") for s in t[col]]
-    raise ValueError("tabla de componentes no encontrada")
+    seen = [(len(t), [str(c) for c in t.columns][:6]) for t in pd.read_html(io.StringIO(html))]
+    raise ValueError(f"tabla de componentes no encontrada; tablas: {seen[:12]}")
 
 
 def _index(name: str) -> list[str]:

@@ -67,6 +67,9 @@ def main(argv=None):
     print(f"  {len(analysis['rejected'])} candidatos en Fase 2 descartados; "
           f"mercado en {strategy.STAGE_NAMES[analysis['market']['stage']]}")
     if args.dry_run:
+        print("  Rupturas que no acaban en orden:")
+        for r in analysis["rejected"]:
+            print(f"    {r['symbol']:<8} {r['reason']}")
         print("Dry-run: no se ha guardado estado ni actualizado la web")
         return
 
