@@ -18,10 +18,12 @@ SP500_ALT = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/ma
 def _from_wikipedia(url: str) -> list[str]:
     html = requests.get(url, headers=UA, timeout=30).text
     for t in pd.read_html(io.StringIO(html)):
-        cols = [str(c) for c in t.columns]
-        for name in ("Symbol", "Ticker"):
-            if name in cols and len(t) >= 90:
-                return [str(s).strip().replace(".", "-") for s in t[name]]
+        if not 90 <= len(t) <= 600:
+            continue
+        for col in t.columns:
+            name = " ".join(map(str, col)) if isinstance(col, tuple) else str(col)
+            if "symbol" in name.lower() or "ticker" in name.lower():
+                return [str(s).strip().replace(".", "-") for s in t[col]]
     raise ValueError("tabla de componentes no encontrada")
 
 
