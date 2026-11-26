@@ -108,8 +108,6 @@ function kpis(s, cash) {
     ["CAGR", s.cagr_pct == null ? "—" : pct(s.cagr_pct), sign(s.cagr_pct),
       s.cagr_pct == null ? "rentabilidad anual; disponible a los 3 meses" : `rentabilidad anual · S&P 500 ${pct(s.spy_cagr_pct)}`],
     ["Alfa frente al S&P 500", pct(s.alpha_pct), sign(s.alpha_pct), `S&P 500 en el periodo: ${pct(s.spy_return_pct)}`],
-    ["Alfa de Jensen anualizada", s.jensen_alpha_pct == null ? "—" : pct(s.jensen_alpha_pct), sign(s.jensen_alpha_pct),
-      s.jensen_alpha_pct == null ? "disponible con 8 semanas de datos" : `beta ${num(s.beta)}`],
     ["Patrimonio", num(s.equity, 0) + " $", "", `liquidez ${num(cash, 0)} $`],
   ];
   $("kpis").innerHTML = items.map(([l, v, c, n]) =>
