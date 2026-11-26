@@ -57,7 +57,7 @@ def performance(equity: pd.DataFrame, spy: pd.Series) -> dict:
 def _order_row(o: dict, state: dict) -> dict:
     sym = o["symbol"]
     if o["side"] == "buy":
-        kind = "Compra en ruptura"
+        kind = "Compra en retroceso" if "-entp-" in o["client_order_id"] else "Compra tras ruptura confirmada"
         reason = state["pending"].get(sym, {}).get("reason", "")
     elif o["type"] == "stop":
         kind = "Stop de pérdidas"

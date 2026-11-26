@@ -27,17 +27,25 @@ def save_state(state_dir: Path, state: dict) -> None:
 
 
 def sync_fills(positions: list[dict], state: dict, today: str) -> None:
-    """Alinea el estado con el bróker: altas (entradas ejecutadas) y bajas (posiciones cerradas)."""
-    held = {p["symbol"] for p in positions}
-    for sym in held - set(state["positions"]):
-        pend = state["pending"].pop(sym, None)
-        state["positions"][sym] = {
-            "stop": pend["stop"] if pend else None,
-            "entry_date": today,
-            "flags": [],
-            "reason": pend["reason"] if pend else "posición ya existente en la cuenta",
-        }
-    for sym in set(state["positions"]) - held:
+    """Alinea el estado con el bróker: altas, segundas compras y posiciones cerradas."""
+    held = {p["symbol"]: p for p in positions}
+    for sym, p in held.items():
+        st = state["positions"].get(sym)
+        if st is None:
+            pend = state["pending"].pop(sym, None)
+            both = bool(pend) and len(pend["qtys"]) == 2 and p["qty"] > pend["qtys"][0]
+            state["positions"][sym] = st = {
+                "stop": pend["stop"] if pend else None,
+                "entry_date": today,
+                "flags": [],
+                "tranches": 2 if both else 1,
+                "reason": pend["reason"] if pend else "posición ya existente en la cuenta",
+            }
+        elif p["qty"] > st.get("qty", p["qty"]):     # se ejecutó la compra en retroceso
+            st["tranches"] = 2
+            state["pending"].pop(sym, None)
+        st["qty"] = p["qty"]
+    for sym in set(state["positions"]) - set(held):
         del state["positions"][sym]
 
 
@@ -81,16 +89,16 @@ def ensure_stop(broker, pos: dict, stop: float, orders: list[dict]) -> tuple[flo
     return stop, "stop colocado"
 
 
-def _submit_entry(broker, sym: str, qty: int, s: dict) -> str:
-    order = {"symbol": sym, "qty": str(qty), "side": "buy", "type": "stop_limit",
-             "stop_price": str(s["entry"]), "limit_price": str(s["limit"]),
-             "time_in_force": "gtc", "client_order_id": _cid("ent", sym)}
+def _submit_entry(broker, sym: str, qty: int, limit: float, stop: float, kind: str) -> str:
+    tag = "entc" if kind == "confirmación" else "entp"
+    order = {"symbol": sym, "qty": str(qty), "side": "buy", "type": "limit",
+             "limit_price": str(limit), "time_in_force": "gtc", "client_order_id": _cid(tag, sym)}
     try:
-        broker.submit({**order, "order_class": "oto", "stop_loss": {"stop_price": str(s["stop"])}})
-        return "con stop asociado (OTO)"
+        broker.submit({**order, "order_class": "oto", "stop_loss": {"stop_price": str(stop)}})
+        return "con stop asociado"
     except BrokerError:
-        # Alpaca puede no admitir OTO con entrada stop: el guardián pondrá el stop (R-S5)
-        broker.submit({**order, "client_order_id": _cid("ent", sym)})
+        # si Alpaca no admite la orden con stop asociado, el guardián lo pone al ejecutarse (R-S5)
+        broker.submit({**order, "client_order_id": _cid(tag, sym)})
         return "stop a cargo del guardián"
 
 
@@ -185,34 +193,48 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
         if s["market"] != "US":
             europe.append(s)
             continue
+        todo = s["orders"]
         if sym in held:
-            continue
+            st = state["positions"][sym]
+            # R-E6: a una posición abierta solo se le añade la compra en retroceso,
+            # una vez, y nunca si ya ha dado señales de debilidad
+            if sym in exiting or st.get("tranches", 1) >= 2 or st.get("flags"):
+                continue
+            todo = [o for o in todo if o["kind"] == "retroceso"]
+            if not todo:
+                continue
         if market_stage == 4:
             rejected.append({"symbol": sym, "market": "US",
                              "reason": "S&P 500 en Fase 4: no se abren posiciones"})
             continue
-        qty = strategy.position_size(acct["equity"], s["entry"], s["stop"], cfg, market_stage)
-        cost = qty * s["limit"]
-        if qty < 1:
-            rejected.append({"symbol": sym, "market": "US", "reason": "tamaño inferior a 1 título"})
-        elif slots <= 0:
+        full = strategy.position_size(acct["equity"], max(o["limit"] for o in s["orders"]),
+                                      s["stop"], cfg, market_stage)
+        half = full // 2
+        cost = sum(half * o["limit"] for o in todo)
+        if half < 1:
+            rejected.append({"symbol": sym, "market": "US", "reason": "tamaño inferior a 1 título por compra"})
+        elif sym not in held and slots <= 0:
             rejected.append({"symbol": sym, "market": "US",
                              "reason": "cartera completa: candidatos con más MRS por delante"})
         elif cost > budget:
             rejected.append({"symbol": sym, "market": "US", "reason": "liquidez insuficiente"})
         else:
-            try:
-                note = _submit_entry(broker, sym, qty, s)
-            except BrokerError as exc:
-                rejected.append({"symbol": sym, "market": "US",
-                                 "reason": f"orden rechazada por Alpaca: {str(exc)[:120]}"})
+            placed = []
+            for o in todo:
+                try:
+                    note = _submit_entry(broker, sym, half, o["limit"], s["stop"], o["kind"])
+                    placed.append(f"{o['kind']} a {o['limit']:.2f}")
+                except BrokerError as exc:
+                    rejected.append({"symbol": sym, "market": "US",
+                                     "reason": f"orden rechazada por Alpaca: {str(exc)[:120]}"})
+            if not placed:
                 continue
-            slots -= 1
+            if sym not in held:
+                slots -= 1
             budget -= cost
-            state["pending"][sym] = {"stop": s["stop"], "entry": s["entry"], "limit": s["limit"],
-                                     "qty": qty, "reason": s["reason"]}
+            state["pending"][sym] = {"stop": s["stop"], "qtys": [half] * len(placed), "reason": s["reason"]}
             decisions.append({"symbol": sym, "action": "Orden de compra",
-                              "detail": f"{qty} títulos, stop de compra {s['entry']:.2f}, "
+                              "detail": f"{half} títulos por compra: {' y '.join(placed)}; "
                                         f"stop de pérdidas {s['stop']:.2f} ({note}). {s['reason']}"})
 
     return {

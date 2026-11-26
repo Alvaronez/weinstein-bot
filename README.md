@@ -2,7 +2,7 @@
 
 Bot de trading semanal basado en el Análisis de Fases de Stan Weinstein. Cada sábado,
 con el mercado cerrado, analiza velas semanales, deja colocadas en Alpaca (cuenta paper)
-las órdenes de compra en ruptura, sube los stops, reduce posiciones débiles y publica
+las compras tras rupturas confirmadas por volumen y en su retroceso, sube los stops, reduce posiciones débiles y publica
 un panel web con la rentabilidad, el alfa frente al S&P 500 y las órdenes vivas.
 
 El proyecto sigue un flujo *spec-driven*: lee primero `specs/`.
@@ -35,7 +35,7 @@ serán visibles para cualquiera con el enlace. Las claves no se guardan nunca en
 
 ```
 pip install -r requirements.txt
-pytest -q                              # 35 tests con series sintéticas
+pytest -q                              # 38 tests con series sintéticas
 python -m bot.run_weekly --dry-run     # sin claves simula una cuenta de 100.000 $
 python -m tools.make_demo              # regenera los datos de ejemplo del panel
 ```

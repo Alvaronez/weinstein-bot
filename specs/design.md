@@ -43,43 +43,50 @@ La pendiente es la variación de la MM30 en 4 semanas. La antigüedad de la tend
 (R-F3) cuenta las semanas desde que `última_tendencia` cambió por última vez, de modo
 que una semana suelta de transición no reinicia una Fase 2 madura.
 
-## Resistencias y filtro de entrada (R-R, R-E)
+## Resistencias y entradas (R-R, R-E)
 
 1. Máximos pivote de ±3 semanas en 104 semanas, más el máximo reciente no confirmado.
-2. Se ordenan por precio y se agrupan en zonas con tolerancia del 3 %. Nivel de la zona = su máximo.
-3. Solo cuentan las zonas por encima del cierre.
-4. **Zona de ruptura** = la más cercana. Es válida si tiene ≥ 2 toques o su último toque tiene ≥ 3 semanas.
-5. **Resistencia superior** = la siguiente zona por encima. Si no hay, es subida libre.
+2. Se agrupan de arriba abajo en zonas con tolerancia del 3 %. Nivel de la zona = su máximo.
+3. Una zona es válida para romper si tiene ≥ 2 toques o su último toque tiene ≥ 3 semanas.
+
+**Ruptura confirmada** (`find_breakout`): para cada una de las últimas 6 semanas, de la más
+reciente a la más antigua, se reconstruyen las zonas tal como estaban la semana anterior. Hay
+ruptura si el cierre supera una zona válida en un 0,5 %. Se exige volumen ≥ 2× la media de las
+4 semanas previas y que ningún cierre posterior pierda el nivel en más de un 3 %.
 
 ```
-entrada = zona × 1,005        límite = entrada × 1,03
-stop    = min(mínimo de la base, MM30) × 0,99
-R/R     = (resistencia superior − entrada) / (entrada − stop)   → se exige ≥ 2
+compra en confirmación = último cierre × 1,01   (solo la semana de la ruptura, cierre ≤ nivel × 1,07)
+compra en retroceso    = nivel roto × 1,01      (toda la ventana de 6 semanas)
+stop  = min(mínimo desde la base, MM30) × 0,99
+R/R   = (resistencia anterior por encima − entrada) / (entrada − stop)   → se exige ≥ 2
 ```
+
+Cada compra es la mitad del tamaño calculado por riesgo. Ambas son órdenes límite: si el
+precio abre por debajo del límite se ejecutan a mercado, a mejor precio.
 
 ## Gestión de la posición (R-S, R-D)
 
 Orden de evaluación cada fin de semana:
 
 1. Fase 4 → salida total.
-2. Reducciones no aplicadas aún: Fase 3 (50 %), ruptura sin volumen (50 %), MRS < 0 dos semanas (25 %). Se aplica la mayor y se marcan todas las disparadas.
+2. Reducciones no aplicadas aún: Fase 3 (50 %), MRS < 0 dos semanas (25 %). Se aplica la mayor y se marcan todas las disparadas.
 3. Stop candidato: Fase 2 → `min(último mínimo de corrección, MM30) × 0,99`; Fase 3 → `último mínimo × 0,99`. Nuevo stop = `max(stop actual, candidato)`, siempre por debajo del cierre.
 
 ## Órdenes en Alpaca
 
 | Acción | Orden |
 |---|---|
-| Entrada | `buy stop_limit gtc`. Se intenta como `oto` con `stop_loss`; si Alpaca lo rechaza, entrada simple y el guardián pone el stop al ejecutarse |
+| Entrada | `buy limit gtc` (una por compra). Se envía como `oto` con `stop_loss`; si Alpaca lo rechaza, entrada simple y el guardián pone el stop al ejecutarse |
 | Stop | `sell stop gtc` por toda la posición |
 | Subir stop / reducir | cancelar stop → (venta parcial `market day`) → nuevo stop por el resto |
 | Salida Fase 4 | cancelar stop → `sell market day` (se ejecuta en la apertura del lunes) |
 
-Las órdenes del bot llevan `client_order_id` con prefijo `wb-` (`wb-ent-`, `wb-stp-`, `wb-red-`, `wb-exit-`).
+Las órdenes del bot llevan `client_order_id` con prefijo `wb-` (`wb-entc-` confirmación, `wb-entp-` retroceso, `wb-stp-`, `wb-red-`, `wb-exit-`).
 Símbolos: Yahoo usa `BRK-B`, Alpaca `BRK.B`; la conversión vive en `broker.py`.
 
 ## Estado persistente (`state/`)
 
-- `positions.json` — por símbolo: stop vigente, fecha de entrada, reducciones aplicadas, motivo de entrada.
+- `positions.json` — por símbolo: stop vigente, fecha de entrada, compras ejecutadas (1 o 2), reducciones aplicadas, motivo de entrada.
 - `pending.json` — entradas pendientes con su stop previsto (lo usa el guardián).
 - `equity.csv` — fecha, patrimonio, liquidez (una fila por día).
 - `analysis.json` — resultado del último análisis semanal.

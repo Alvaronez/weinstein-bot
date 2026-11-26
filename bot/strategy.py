@@ -41,74 +41,114 @@ def round_price(p: float) -> float:
 
 # ---------------------------------------------------------------- entradas
 
-def check_entry(w: pd.DataFrame, cfg: dict) -> tuple[dict | None, str, bool]:
-    """Devuelve (setup, motivo, pasa_filtro_de_fase).
+def find_breakout(w: pd.DataFrame, cfg: dict) -> dict | None:
+    """Ruptura más reciente de una resistencia válida (R-E2).
 
-    setup es None si no procede colocar orden; motivo lo explica (R-E8).
+    Recorre las últimas semanas y, para cada una, reconstruye las resistencias tal
+    como estaban la semana anterior. Hay ruptura si el cierre las supera.
+    """
+    e, rc = cfg["entry"], cfg["resistance"]
+    closes = w["close"].values
+    n = len(w)
+    for back in range(e["breakout_window_weeks"]):
+        b = n - 1 - back
+        prior = w.iloc[:b]
+        if len(prior) < 40:
+            break
+        broken = [z for z in zones_above(prior, cfg)
+                  if (z["touches"] >= 2 or z["age"] >= rc["min_base_weeks"])
+                  and closes[b] > z["level"] * (1 + e["trigger_buffer"])]
+        if broken:
+            z = max(broken, key=lambda z: z["level"])
+            return {"index": b, "weeks_ago": back, "level": z["level"], "touches": z["touches"],
+                    "base_weeks": max(z["age"], rc["min_base_weeks"]),
+                    "vol_ratio": float(w["vol_ratio"].iloc[b]),
+                    "mrs": float(w["mrs"].iloc[b])}
+    return None
+
+
+def check_entry(w: pd.DataFrame, cfg: dict) -> tuple[dict | None, str, bool]:
+    """Devuelve (setup, motivo, hubo_ruptura).
+
+    setup es None si no procede colocar órdenes; motivo lo explica (R-E8).
+    Un setup lleva una o dos órdenes: compra tras la confirmación y compra en el retroceso.
     """
     e = cfg["entry"]
     r = w.iloc[-1]
-    close, sma = float(r["close"]), float(r["sma"])
+    close, sma, stage = float(r["close"]), float(r["sma"]), int(r["stage"])
 
-    # R-E1 · Fase 2 consolidada
-    if r["stage"] != 2:
-        return None, f"no está en Fase 2 ({STAGE_NAMES[int(r['stage'])]})", False
-    if r["trend_age"] < e["min_weeks_in_stage2"]:
-        return None, f"Fase 2 demasiado reciente ({int(r['trend_age'])} sem.)", False
+    # R-E1 · Fase 2, o salida de la base con la MM30 ya girando
+    starting = stage == 1 and close > sma and r["slope"] >= 0
+    if stage != 2 and not starting:
+        return None, f"no está en Fase 2 ({STAGE_NAMES[stage]})", False
     if pd.isna(r["mrs"]) or r["mrs"] <= 0:
         return None, "fuerza relativa de Mansfield negativa", False
     if close < e["min_price"]:
         return None, "precio por debajo del mínimo", False
+
+    # R-E2 · ruptura reciente y confirmada por volumen
+    bo = find_breakout(w, cfg)
+    if bo is None:
+        return None, f"sin ruptura de resistencia en las últimas {e['breakout_window_weeks']} semanas", False
+    level, ago = bo["level"], bo["weeks_ago"]
+    cuando = "esta semana" if ago == 0 else f"hace {ago} sem."
+    if pd.isna(bo["vol_ratio"]) or bo["vol_ratio"] < e["breakout_volume_mult"]:
+        return None, (f"ruptura de {level:.2f} {cuando} sin volumen suficiente "
+                      f"({bo['vol_ratio']:.1f}× la media, se exige {e['breakout_volume_mult']}×)"), True
+    if (w["close"].iloc[bo["index"]:] < level * (1 - e["fail_tolerance"])).any():
+        return None, f"ruptura de {level:.2f} fallida: el precio volvió a perder el nivel", True
     ext = close / sma - 1
     if ext > e["max_extension"]:
         return None, f"extendida un {ext:.0%} sobre la MM30", True
 
-    # R-R · resistencias
-    zones = zones_above(w, cfg)
-    if not zones:
-        return None, "en máximos sin base formada: esperar consolidación", True
-    zone = zones[0]
-    dist = zone["level"] / close - 1
-    if dist > e["max_breakout_distance"]:
-        return None, f"resistencia en {zone['level']:.2f}, a un {dist:.1%}: demasiado lejos", True
-    valid = zone["touches"] >= 2 or zone["age"] >= cfg["resistance"]["min_base_weeks"]
-    if not valid:
-        return None, f"máximo reciente en {zone['level']:.2f} sin base formada", True
-
-    entry = round_price(zone["level"] * (1 + e["trigger_buffer"]))
-    limit = round_price(entry * (1 + e["limit_buffer"]))
-
-    # R-S1 · stop inicial bajo el mínimo de la base y la MM30
-    base_weeks = max(zone["age"], cfg["resistance"]["min_base_weeks"])
-    base_low = float(w["low"].iloc[-base_weeks:].min())
+    # R-S1 · stop bajo el mínimo de la base y la MM30
+    start = max(0, bo["index"] - bo["base_weeks"])
+    base_low = float(w["low"].iloc[start:].min())
     stop = round_price(min(base_low, sma) * (1 - cfg["stops"]["buffer"]))
-    risk = entry - stop
-    risk_pct = risk / entry
-    if risk_pct > e["max_stop_distance"]:
-        return None, f"stop a un {risk_pct:.1%} de la entrada: riesgo excesivo", True
 
-    # R-E3c · resistencia superior
-    next_res = zones[1]["level"] if len(zones) > 1 else None
-    rr = None
-    if next_res is not None:
-        rr = (next_res - entry) / risk
-        if rr < e["min_reward_risk"]:
-            return None, (f"resistencia superior en {next_res:.2f}: "
-                          f"recorrido/riesgo {rr:.1f} < {e['min_reward_risk']:.0f}"), True
+    # R-E3 · dos compras posibles
+    orders, notes = [], []
+    if ago == 0:
+        if close <= level * (1 + e["max_chase"]):
+            orders.append({"kind": "confirmación", "limit": round_price(close * (1 + e["confirm_buffer"]))})
+        else:
+            notes.append(f"cierre un {close / level - 1:.0%} sobre el nivel roto: solo se espera el retroceso")
+    orders.append({"kind": "retroceso", "limit": round_price(level * (1 + e["pullback_buffer"]))})
 
-    libre = "subida libre" if next_res is None else f"siguiente resistencia {next_res:.2f} (R/R {rr:.1f})"
-    setup = {
-        "entry": entry, "limit": limit, "stop": stop,
-        "zone": round_price(zone["level"]), "touches": zone["touches"],
+    # R-E4 · resistencias anteriores a la ruptura que queden por encima
+    top = max(o["limit"] for o in orders)
+    above = [z["level"] for z in zones_above(w, cfg)
+             if z["confirmed"] and z["age"] > ago and z["level"] > top]
+    next_res = min(above) if above else None
+
+    kept, why = [], ""
+    for o in orders:
+        risk = o["limit"] - stop
+        if risk <= 0 or risk / o["limit"] > e["max_stop_distance"]:
+            why = f"stop a un {risk / o['limit']:.1%} de la entrada: riesgo excesivo"
+            continue
+        if next_res is not None:
+            rr = (next_res - o["limit"]) / risk
+            if rr < e["min_reward_risk"]:
+                why = (f"resistencia superior en {next_res:.2f}: "
+                       f"recorrido/riesgo {rr:.1f} < {e['min_reward_risk']:.0f}")
+                continue
+        kept.append(o)
+    if not kept:
+        return None, why, True
+
+    libre = "subida libre" if next_res is None else f"siguiente resistencia {next_res:.2f}"
+    reason = (f"{STAGE_NAMES[stage]}; rompió {level:.2f} ({bo['touches']} toques) {cuando} con "
+              f"{bo['vol_ratio']:.1f}× de volumen; MRS {r['mrs']:+.1f}; {libre}")
+    if notes:
+        reason += "; " + "; ".join(notes)
+    return {
+        "orders": kept, "entry": kept[0]["limit"], "stop": stop,
+        "zone": round_price(level), "weeks_ago": ago,
+        "vol_ratio": round(bo["vol_ratio"], 1), "mrs": round(float(r["mrs"]), 1),
         "next_resistance": None if next_res is None else round_price(next_res),
-        "reward_risk": None if rr is None else round(rr, 1),
-        "risk_pct": round(risk_pct * 100, 1),
-        "mrs": round(float(r["mrs"]), 1),
-        "trend_age": int(r["trend_age"]),
-        "reason": (f"Fase 2 de {int(r['trend_age'])} sem., MRS {r['mrs']:+.1f}; "
-                   f"ruptura de {zone['level']:.2f} ({zone['touches']} toques); {libre}"),
-    }
-    return setup, setup["reason"], True
+        "reason": reason,
+    }, reason, True
 
 
 def position_size(equity: float, entry: float, stop: float, cfg: dict, market_stage: int) -> int:
@@ -145,15 +185,6 @@ def manage(w: pd.DataFrame, pos: dict, cfg: dict) -> dict:
         flags.append("stage3")
         fraction = max(fraction, wk["stage3_reduce"])
         reasons.append("entra en Fase 3 (la MM30 se aplana o el precio la pierde)")
-    if "volume" not in flags:
-        since = w[w.index >= entry_date]
-        if len(since):
-            flags.append("volume")
-            ratio = since["vol_ratio"].iloc[0]
-            if not pd.isna(ratio) and ratio < wk["breakout_volume_mult"]:
-                fraction = max(fraction, wk["no_volume_reduce"])
-                reasons.append(f"ruptura sin volumen ({ratio:.1f}× la media, "
-                               f"se exige {wk['breakout_volume_mult']}×)")
     n = wk["rs_negative_weeks"]
     if "rs" not in flags and len(w) >= n and (w["mrs"].iloc[-n:] < 0).all():
         flags.append("rs")

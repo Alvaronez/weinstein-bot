@@ -37,3 +37,15 @@ OVERHEAD = [110] * 30 + ramp(110, 75, 20) + [75] * 10 + ramp(75, 100, 35) + CONS
 
 STAGE4 = [50] * 40 + ramp(50, 100, 50) + ramp(100, 60, 25)
 STAGE3 = [50] * 40 + ramp(50, 100, 50) + [100, 99, 101, 100, 99, 100, 101, 99, 100, 99] * 3 + [100, 100]
+
+
+def spike(closes, weeks_ago=0, mult=2.5):
+    """Volumen: normal salvo un pico en la semana indicada."""
+    vol = [1e6] * len(closes)
+    vol[len(closes) - 1 - weeks_ago] = mult * 1e6
+    return vol
+
+
+# Ruptura de la resistencia de 101 con cierre en 104
+BREAKOUT = STAGE2_SETUP + [104]
+PULLBACK = STAGE2_SETUP + [104, 106, 103]

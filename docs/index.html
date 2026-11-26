@@ -93,7 +93,7 @@ const num = (x, d = 2) => x == null ? "—" : Number(x).toLocaleString("es-ES", 
 const pct = (x, d = 2) => x == null ? "—" : (x > 0 ? "+" : x < 0 ? "−" : "") + num(Math.abs(x), d) + " %";
 const sign = x => x == null || x === 0 ? "" : x > 0 ? "pos" : "neg";
 const fase = s => s ? `<span class="chip">Fase ${s}</span>` : "—";
-const FLAGS = { stage3: "reducida por Fase 3", rs: "reducida por fuerza relativa", volume: "" };
+const FLAGS = { stage3: "reducida por Fase 3", rs: "reducida por fuerza relativa" };
 
 function table(el, cols, rows, empty) {
   if (!rows || !rows.length) { $(el).innerHTML = `<div class="empty">${empty}</div>`; return; }
@@ -185,7 +185,7 @@ fetch("data.json?" + Date.now()).then(r => r.json()).then(d => {
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
     { h: "Orden", f: r => esc(r.kind) },
     { h: "Títulos", n: 1, f: r => num(r.qty, 0) },
-    { h: "Precio de disparo", n: 1, f: r => num(r.stop_price) },
+    { h: "Stop", n: 1, f: r => num(r.stop_price) },
     { h: "Límite", n: 1, f: r => num(r.limit_price) },
     { h: "Estado", f: r => `<span class="chip">${esc(r.status === "held" ? "en espera" : "activa")}</span>` },
     { h: "Motivo", f: r => esc(r.reason) },
@@ -226,7 +226,7 @@ fetch("data.json?" + Date.now()).then(r => r.json()).then(d => {
 
   table("europe", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Ruptura", n: 1, f: r => num(r.entry) },
+    { h: "Compra", n: 1, f: r => num(r.entry) },
     { h: "Stop", n: 1, f: r => num(r.stop) },
     { h: "MRS", n: 1, f: r => num(r.mrs, 1) },
   ], a.europe_signals, "Sin señales esta semana.");

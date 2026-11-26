@@ -25,11 +25,14 @@ resistance:                 # R-R
   min_base_weeks: 3
 
 entry:                      # R-E
-  min_weeks_in_stage2: 4
-  max_extension: 0.25       # máx. sobre la MM30
-  max_breakout_distance: 0.08
-  trigger_buffer: 0.005
-  limit_buffer: 0.03
+  max_extension: 0.25         # máx. sobre la MM30
+  breakout_window_weeks: 6    # la ruptura debe haberse producido en estas semanas
+  breakout_volume_mult: 2.0   # volumen de la semana de ruptura / media de las 4 previas (Weinstein: 2×)
+  trigger_buffer: 0.005       # el cierre debe superar la resistencia en este margen
+  fail_tolerance: 0.03        # cierre por debajo del nivel roto = ruptura fallida
+  max_chase: 0.07             # no comprar en confirmación más lejos del nivel roto
+  confirm_buffer: 0.01        # límite de la compra en confirmación sobre el último cierre
+  pullback_buffer: 0.01       # límite de la compra en retroceso sobre el nivel roto
   min_reward_risk: 2.0
   max_stop_distance: 0.15
   min_price: 5.0
@@ -48,8 +51,6 @@ weakness:                   # R-D
   stage3_reduce: 0.50
   rs_negative_weeks: 2
   rs_negative_reduce: 0.25
-  breakout_volume_mult: 1.5
-  no_volume_reduce: 0.50
 
 alpaca:
   base_url: https://paper-api.alpaca.markets   # cuenta paper

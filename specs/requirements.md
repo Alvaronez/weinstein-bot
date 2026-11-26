@@ -35,24 +35,27 @@ identificador que se referencia desde `design.md`, `tasks.md` y los tests.
 ## R-R · Resistencias
 
 - **R-R1** El sistema DEBE detectar máximos pivote (máximo de una ventana de ±3 semanas) en las últimas 104 semanas y agruparlos en zonas de resistencia cuando difieran menos de un 3 %.
-- **R-R2** El máximo de las últimas semanas aún no confirmado como pivote DEBE contar como resistencia superior, pero NO como nivel de ruptura válido (no hay base formada).
+- **R-R2** Una zona es un nivel de ruptura válido si tiene al menos 2 toques o su último toque tiene 3 semanas o más. El máximo reciente aún no confirmado como pivote NO lo es (no hay base formada).
 - **R-R3** Las zonas por debajo del cierre actual se consideran superadas y NO cuentan.
 
 ## R-E · Entradas
 
-- **R-E1** El sistema solo DEBE proponer compras en valores en **Fase 2 consolidada**: Fase 2 con al menos 4 semanas de antigüedad, MRS > 0 y precio no extendido más de un 25 % sobre la MM30.
-- **R-E2** La entrada DEBE ser una orden **buy stop-limit GTC** un 0,5 % por encima de la zona de resistencia más cercana, con límite un 3 % por encima del disparo.
-- **R-E3** El sistema NO DEBE colocar la orden SI:
-  - a) la resistencia más cercana está a más de un 8 % del cierre;
-  - b) esa zona no es un nivel válido (R-R2);
-  - c) existe otra resistencia por encima tal que (resistencia − entrada) / (entrada − stop) < 2;
-  - d) el stop inicial queda a más de un 15 % de la entrada;
-  - e) el S&P 500 está en Fase 4.
-- **R-E4** SI el S&P 500 está en Fase 3, ENTONCES el riesgo por operación DEBE reducirse a la mitad.
-- **R-E5** El tamaño DEBE calcularse por riesgo: 1 % del patrimonio dividido por la distancia al stop, con un máximo del 10 % del patrimonio por posición, un máximo de 15 posiciones y sin apalancamiento (la suma de entradas pendientes no supera la liquidez).
-- **R-E6** CUANDO haya más candidatos que huecos, el sistema DEBE priorizar por MRS descendente.
+El bot no se adelanta a la ruptura: compra cuando ya está confirmada y en su retroceso.
+
+- **R-E1** El sistema solo DEBE proponer compras en valores en **Fase 2**, o saliendo de la base (cierre sobre la MM30 y MM30 sin caer), con MRS > 0 y precio no extendido más de un 25 % sobre la MM30.
+- **R-E2** DEBE existir una **ruptura confirmada**: en las últimas 6 semanas un cierre semanal superó en un 0,5 % una zona de resistencia válida, con un volumen esa semana de al menos 2× la media de las 4 semanas previas. SI el precio volvió a cerrar más de un 3 % por debajo del nivel roto, la ruptura se considera fallida.
+- **R-E3** Con una ruptura confirmada el sistema DEBE colocar hasta dos órdenes límite GTC, cada una por la mitad del tamaño:
+  - **compra en confirmación** — solo el fin de semana de la ruptura y si el cierre no supera en más de un 7 % el nivel roto; límite un 1 % sobre el último cierre;
+  - **compra en retroceso** — durante toda la ventana de 6 semanas; límite un 1 % sobre el nivel roto.
+- **R-E4** El sistema NO DEBE colocar una orden SI:
+  - a) existe una resistencia anterior por encima tal que (resistencia − entrada) / (entrada − stop) < 2;
+  - b) el stop inicial queda a más de un 15 % de la entrada;
+  - c) el S&P 500 está en Fase 4.
+  SI el S&P 500 está en Fase 3, el riesgo por operación DEBE reducirse a la mitad.
+- **R-E5** El tamaño total DEBE calcularse por riesgo: 1 % del patrimonio dividido por la distancia al stop, con un máximo del 10 % del patrimonio por posición, un máximo de 15 posiciones y sin apalancamiento.
+- **R-E6** CUANDO haya más candidatos que huecos, el sistema DEBE priorizar por MRS descendente. A una posición ya abierta solo se le puede añadir la compra en retroceso, una vez, y nunca si ha dado señales de debilidad.
 - **R-E7** Las órdenes de entrada no ejecutadas DEBEN cancelarse y recalcularse cada fin de semana.
-- **R-E8** Toda decisión de no colocar una orden DEBE quedar registrada con su motivo y mostrarse en la web.
+- **R-E8** Toda ruptura que no acabe en orden DEBE quedar registrada con su motivo y mostrarse en la web.
 
 ## R-S · Stops
 
@@ -66,7 +69,7 @@ identificador que se referencia desde `design.md`, `tasks.md` y los tests.
 
 - **R-D1** CUANDO una posición pase a **Fase 3**, el sistema DEBE vender el 50 %.
 - **R-D2** CUANDO la MRS sea negativa dos semanas seguidas, el sistema DEBE vender el 25 %.
-- **R-D3** CUANDO la semana de la ruptura no alcance 1,5× el volumen medio, el sistema DEBE vender el 50 %.
+- **R-D3** (Retirado: el volumen se exige antes de comprar, R-E2.)
 - **R-D4** Cada regla de reducción DEBE aplicarse una sola vez por posición; si coinciden varias se aplica la mayor.
 - **R-D5** CUANDO una posición pase a **Fase 4**, el sistema DEBE vender la totalidad a mercado en la siguiente apertura.
 - **R-D6** Tras una reducción, el stop DEBE recolocarse por los títulos restantes.

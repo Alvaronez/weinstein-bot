@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25 20:40 UTC",
+ "updated": "2026-11-26 12:08 UTC",
  "cash": 40000,
  "summary": {
   "start_date": "2026-05-25",
@@ -677,9 +677,7 @@
    "stage": 2,
    "stop": 108.21,
    "entry_date": "2026-07-31",
-   "flags": [
-    "volume"
-   ]
+   "flags": []
   },
   {
    "symbol": "EJEMPLO2",
@@ -692,7 +690,6 @@
    "stop": 97.03,
    "entry_date": "2026-03-06",
    "flags": [
-    "volume",
     "stage3"
    ]
   }
@@ -733,21 +730,43 @@
   },
   {
    "symbol": "EJEMPLO3",
-   "kind": "Compra en ruptura",
+   "kind": "Compra tras ruptura confirmada",
    "side": "buy",
-   "qty": 91.0,
-   "stop_price": 101.5,
-   "limit_price": 104.55,
+   "qty": 36.0,
+   "stop_price": null,
+   "limit_price": 105.04,
    "status": "new",
    "tif": "gtc",
-   "reason": "Fase 2 de 57 sem., MRS +17.3; ruptura de 101.00 (5 toques); subida libre"
+   "reason": "Fase 2; rompió 101.00 (5 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
   },
   {
    "symbol": "EJEMPLO3",
    "kind": "Stop de pérdidas",
    "side": "sell",
-   "qty": 91.0,
-   "stop_price": 91.46,
+   "qty": 36.0,
+   "stop_price": 92.22,
+   "limit_price": null,
+   "status": "held",
+   "tif": "gtc",
+   "reason": "Se activará si la compra se ejecuta"
+  },
+  {
+   "symbol": "EJEMPLO3",
+   "kind": "Compra en retroceso",
+   "side": "buy",
+   "qty": 36.0,
+   "stop_price": null,
+   "limit_price": 102.01,
+   "status": "new",
+   "tif": "gtc",
+   "reason": "Fase 2; rompió 101.00 (5 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
+  },
+  {
+   "symbol": "EJEMPLO3",
+   "kind": "Stop de pérdidas",
+   "side": "sell",
+   "qty": 36.0,
+   "stop_price": 92.22,
    "limit_price": null,
    "status": "held",
    "tif": "gtc",
@@ -781,19 +800,19 @@
    {
     "symbol": "EJEMPLO3",
     "action": "Orden de compra",
-    "detail": "91 títulos, stop de compra 101.50, stop de pérdidas 91.46 (con stop asociado (OTO)). Fase 2 de 57 sem., MRS +17.3; ruptura de 101.00 (5 toques); subida libre"
+    "detail": "36 títulos por compra: confirmación a 105.04 y retroceso a 102.01; stop de pérdidas 92.22 (con stop asociado). Fase 2; rompió 101.00 (5 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
    }
   ],
   "rejected": [
    {
     "symbol": "EJEMPLO4",
     "market": "US",
-    "reason": "resistencia superior en 111.10: recorrido/riesgo 1.1 < 2"
+    "reason": "resistencia superior en 111.10: recorrido/riesgo 1.0 < 2"
    },
    {
     "symbol": "EJEMPLO5",
     "market": "US",
-    "reason": "resistencia en 101.00, a un 8.6%: demasiado lejos"
+    "reason": "ruptura de 101.00 esta semana sin volumen suficiente (1.0× la media, se exige 2.0×)"
    }
   ],
   "reason_counts": {},
@@ -801,17 +820,24 @@
    {
     "symbol": "EJEMPLO.DE",
     "market": "EU",
-    "entry": 101.5,
-    "limit": 104.55,
-    "stop": 91.46,
+    "orders": [
+     {
+      "kind": "confirmación",
+      "limit": 105.04
+     },
+     {
+      "kind": "retroceso",
+      "limit": 102.01
+     }
+    ],
+    "entry": 105.04,
+    "stop": 92.22,
     "zone": 101.0,
-    "touches": 5,
+    "weeks_ago": 0,
+    "vol_ratio": 2.5,
+    "mrs": 24.5,
     "next_resistance": null,
-    "reward_risk": null,
-    "risk_pct": 9.9,
-    "mrs": 17.3,
-    "trend_age": 57,
-    "reason": "Fase 2 de 57 sem., MRS +17.3; ruptura de 101.00 (5 toques); subida libre"
+    "reason": "Fase 2; rompió 101.00 (5 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
    }
   ]
  },
