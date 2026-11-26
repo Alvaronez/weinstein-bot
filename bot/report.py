@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 MIN_WEEKS_JENSEN = 8
+MIN_DAYS_CAGR = 90
 
 
 def record_equity(state_dir: Path, today: str, acct: dict) -> pd.DataFrame:
@@ -28,7 +29,12 @@ def performance(equity: pd.DataFrame, spy: pd.Series) -> dict:
     bot_idx = eq / eq.iloc[0] * 100
     spy_idx = bench / bench.iloc[0] * 100
     bot_ret, spy_ret = bot_idx.iloc[-1] / 100 - 1, spy_idx.iloc[-1] / 100 - 1
-    drawdown = (bot_idx / bot_idx.cummax() - 1).min()
+    # CAGR: rentabilidad anualizada. Con poco histórico anualizar engaña, así que se espera.
+    days = int((eq.index[-1] - eq.index[0]).days)
+    cagr = spy_cagr = None
+    if days >= MIN_DAYS_CAGR:
+        cagr = (1 + bot_ret) ** (365 / days) - 1
+        spy_cagr = (1 + spy_ret) ** (365 / days) - 1
 
     jensen = beta = None
     wk = pd.DataFrame({"b": bot_idx, "s": spy_idx}).resample("W-FRI").last().dropna().pct_change().dropna()
@@ -46,7 +52,8 @@ def performance(equity: pd.DataFrame, spy: pd.Series) -> dict:
             "return_pct": pct(bot_ret), "spy_return_pct": pct(spy_ret),
             "alpha_pct": pct(bot_ret - spy_ret),
             "jensen_alpha_pct": pct(jensen), "beta": None if beta is None else round(beta, 2),
-            "max_drawdown_pct": pct(drawdown), "weeks": int(len(wk)),
+            "cagr_pct": pct(cagr), "spy_cagr_pct": pct(spy_cagr), "days": days,
+            "weeks": int(len(wk)),
         },
         "curve": [{"d": d.strftime("%Y-%m-%d"), "bot": round(float(b), 2),
                    "spy": None if np.isnan(s) else round(float(s), 2)}

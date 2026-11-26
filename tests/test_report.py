@@ -20,6 +20,8 @@ def test_r_w1_r_w2_rentabilidad_y_alfa():
     assert abs(s["alpha_pct"] - (s["return_pct"] - s["spy_return_pct"])) < 0.011
     assert abs(s["beta"] - 1) < 0.05
     assert 10 < s["jensen_alpha_pct"] < 16          # ≈ 0,05 % × 5 × 52
+    esperado = ((1 + s["return_pct"] / 100) ** (365 / s["days"]) - 1) * 100
+    assert abs(s["cagr_pct"] - esperado) < 0.01 and s["cagr_pct"] > s["spy_cagr_pct"]
 
 
 def test_alfa_de_jensen_necesita_historico():
@@ -27,7 +29,7 @@ def test_alfa_de_jensen_necesita_historico():
     spy = pd.Series([500.0, 502.5], index=pd.to_datetime(["2026-11-20", "2026-11-23"]))
     s = report.performance(eq, spy)["summary"]
     assert s["return_pct"] == 1.0 and s["spy_return_pct"] == 0.5 and s["alpha_pct"] == 0.5
-    assert s["jensen_alpha_pct"] is None
+    assert s["jensen_alpha_pct"] is None and s["cagr_pct"] is None   # 3 días: no se anualiza
 
 
 def test_r_w4_data_json(tmp_path):

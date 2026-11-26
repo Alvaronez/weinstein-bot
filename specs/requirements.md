@@ -83,7 +83,7 @@ El bot no se adelanta a la ruptura: compra cuando ya está confirmada y en su re
 
 ## R-W · Web
 
-- **R-W1** La web DEBE mostrar la rentabilidad acumulada desde la puesta en marcha del bot.
+- **R-W1** La web DEBE mostrar la rentabilidad acumulada desde la puesta en marcha del bot, el patrimonio con la liquidez y, con al menos 90 días de datos, el CAGR (rentabilidad anualizada) junto al del S&P 500.
 - **R-W2** La web DEBE mostrar el alfa frente al S&P 500: exceso de rentabilidad acumulada y, con al menos 8 semanas de datos, alfa de Jensen anualizada y beta.
 - **R-W3** La web DEBE mostrar la curva de patrimonio del bot y la del S&P 500 en base 100 sobre un mismo eje.
 - **R-W4** La web DEBE mostrar las órdenes colocadas (entradas pendientes y stops), con tipo, precios y motivo.

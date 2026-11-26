@@ -105,12 +105,13 @@ function table(el, cols, rows, empty) {
 function kpis(s, cash) {
   const items = [
     ["Rentabilidad del bot", pct(s.return_pct), sign(s.return_pct), `desde el ${s.start_date}`],
+    ["CAGR", s.cagr_pct == null ? "—" : pct(s.cagr_pct), sign(s.cagr_pct),
+      s.cagr_pct == null ? "rentabilidad anual; disponible a los 3 meses" : `rentabilidad anual · S&P 500 ${pct(s.spy_cagr_pct)}`],
     ["S&P 500 en el mismo periodo", pct(s.spy_return_pct), sign(s.spy_return_pct), "SPY con dividendos"],
     ["Alfa frente al S&P 500", pct(s.alpha_pct), sign(s.alpha_pct), "diferencia de rentabilidad acumulada"],
     ["Alfa de Jensen anualizada", s.jensen_alpha_pct == null ? "—" : pct(s.jensen_alpha_pct), sign(s.jensen_alpha_pct),
       s.jensen_alpha_pct == null ? "disponible con 8 semanas de datos" : `beta ${num(s.beta)}`],
     ["Patrimonio", num(s.equity, 0) + " $", "", `liquidez ${num(cash, 0)} $`],
-    ["Caída máxima", pct(s.max_drawdown_pct), "", "desde un máximo del bot"],
   ];
   $("kpis").innerHTML = items.map(([l, v, c, n]) =>
     `<div class="kpi"><div class="label">${l}</div><div class="value ${c}">${v}</div><div class="note">${n}</div></div>`).join("");

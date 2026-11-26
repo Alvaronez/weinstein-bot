@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26 12:08 UTC",
+ "updated": "2026-11-26 12:43 UTC",
  "cash": 40000,
  "summary": {
   "start_date": "2026-05-25",
@@ -11,7 +11,9 @@
   "alpha_pct": -1.07,
   "jensen_alpha_pct": -4.5,
   "beta": 0.9,
-  "max_drawdown_pct": -10.46,
+  "cagr_pct": -13.28,
+  "spy_cagr_pct": -11.23,
+  "days": 179,
   "weeks": 25
  },
  "curve": [
