@@ -39,7 +39,8 @@ def _order(o: dict) -> dict:
 
 class AlpacaBroker:
     def __init__(self, base_url: str):
-        key, secret = os.environ.get("ALPACA_API_KEY"), os.environ.get("ALPACA_SECRET_KEY")
+        key = (os.environ.get("ALPACA_API_KEY") or "").strip()
+        secret = (os.environ.get("ALPACA_SECRET_KEY") or "").strip()
         if not key or not secret:
             raise BrokerError("Faltan ALPACA_API_KEY / ALPACA_SECRET_KEY en el entorno")
         self.base = base_url.rstrip("/")

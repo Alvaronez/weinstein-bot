@@ -25,7 +25,7 @@ def main(argv=None):
     state_dir = config.ROOT / "state"
     state = executor.load_state(state_dir)
 
-    if os.environ.get("ALPACA_API_KEY"):
+    if (os.environ.get("ALPACA_API_KEY") or "").strip():
         broker = AlpacaBroker(cfg["alpaca"]["base_url"])
     elif args.dry_run:
         print("Sin claves de Alpaca: se simula una cuenta vacía de 100.000 $")
