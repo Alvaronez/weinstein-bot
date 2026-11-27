@@ -86,8 +86,8 @@ El bot no se adelanta a la ruptura: compra cuando ya está confirmada y en su re
 - **R-W1** La web DEBE mostrar la rentabilidad acumulada desde la puesta en marcha del bot, el patrimonio con la liquidez y, con al menos 90 días de datos, el CAGR (rentabilidad anualizada) junto al del S&P 500.
 - **R-W2** La web DEBE mostrar el alfa frente al S&P 500 como exceso de rentabilidad acumulada.
 - **R-W3** La web DEBE mostrar la curva de patrimonio del bot y la del S&P 500 en base 100 sobre un mismo eje.
-- **R-W4** La web DEBE mostrar las órdenes colocadas con tres columnas: valor, orden y motivo. Los tipos de orden son: compra tras ruptura confirmada, compra en retroceso, stop de pérdidas, venta parcial y salida total. Las compras y los stops DEBEN indicar su precio en la divisa del activo; un stop que se ha movido DEBE indicar el nivel anterior y el nuevo; una venta parcial DEBE indicar el porcentaje de la posición que se vende.
-- **R-W5** La web DEBE mostrar las posiciones abiertas con cuatro columnas (valor, precio medio, stop y análisis: fase, posición respecto a la MM30, fuerza relativa y reducciones aplicadas), las decisiones de la semana, las órdenes descartadas con su motivo y las señales europeas.
+- **R-W4** La web DEBE mostrar las **nuevas órdenes de la semana** (valor, orden, motivo): solo lo que cambia respecto a la semana anterior. Tipos: compra tras ruptura confirmada y compra en retroceso (con su precio y su stop), venta parcial (con el porcentaje de la posición), salida total y subida de stop (con el nivel anterior y el nuevo). Los precios van en la divisa del activo. Un stop que no se mueve NO aparece aquí.
+- **R-W5** La web DEBE mostrar las **posiciones abiertas** (valor, precio medio, stop vigente y análisis). El análisis se escribe cada fin de semana para todas las posiciones, haya señal o no: situación del valor, qué se ha hecho esa semana y qué se vigila. También DEBE mostrar las órdenes descartadas con su motivo y las señales europeas.
 - **R-W6** La web DEBE ser estática y regenerarse en cada ejecución.
 
 ## Fuera de alcance

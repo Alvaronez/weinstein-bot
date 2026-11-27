@@ -76,9 +76,8 @@
     <details><summary>Ver los datos en tabla</summary><div class="scroll" id="curve-table"></div></details>
   </section>
 
-  <section class="card"><h2>Órdenes colocadas</h2><div class="sub">Órdenes vivas ahora mismo en Alpaca</div><div class="scroll" id="orders"></div></section>
-  <section class="card"><h2>Posiciones abiertas</h2><div class="scroll" id="positions"></div></section>
-  <section class="card"><h2>Decisiones del último fin de semana</h2><div class="sub" id="market"></div><div class="scroll" id="decisions"></div></section>
+  <section class="card"><h2>Posiciones abiertas</h2><div class="sub">Todas se revisan cada fin de semana, haya señal o no</div><div class="scroll" id="positions"></div></section>
+  <section class="card"><h2>Nuevas órdenes de la semana</h2><div class="sub" id="market"></div><div class="scroll" id="orders"></div></section>
   <section class="card"><h2>Órdenes que no se colocaron</h2><div class="sub">Valores en Fase 2 descartados y el motivo</div><div class="scroll" id="rejected"></div><div class="sub" id="counts" style="margin-top:8px"></div></section>
   <div class="cols">
     <section class="card"><h2>Señales en Europa</h2><div class="sub">STOXX 600 · solo aviso, sin ejecución</div><div class="scroll" id="europe"></div></section>
@@ -176,17 +175,11 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
   $("updated").textContent = "Actualizado " + d.updated;
   $("banner").innerHTML = d.demo
     ? '<div class="banner">Datos de ejemplo para ver la estructura de la página. <a href="./">Ver los datos reales</a></div>'
-    : (d.positions.length || d.orders.length) ? ""
+    : (d.positions.length || (a.week_orders || []).length) ? ""
     : '<div class="banner">El bot todavía no tiene posiciones ni órdenes. <a href="?demo">Ver la página con datos de ejemplo</a></div>';
   kpis(s, d.cash);
   $("chart-sub").textContent = `Base 100 el ${s.start_date}`;
   chart(d.curve);
-
-  table("orders", [
-    { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Orden", f: r => esc(r.kind) },
-    { h: "Motivo", f: r => esc(r.reason) },
-  ], d.orders, "No hay órdenes vivas.");
 
   table("positions", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
@@ -197,14 +190,14 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
 
   const mk = a.market || {};
   $("market").textContent = a.date
-    ? `Análisis del ${a.date} · ${a.universe_size} valores · S&P 500 en Fase ${mk.stage}` +
+    ? `Decididas el ${a.date} con el mercado cerrado · S&P 500 en Fase ${mk.stage}` +
       (mk.stage === 4 ? " (no se abren posiciones)" : mk.stage === 3 ? " (riesgo a la mitad)" : "")
     : "Aún no se ha ejecutado ningún ciclo semanal.";
-  table("decisions", [
+  table("orders", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Acción", f: r => `<span class="chip">${esc(r.action)}</span>` },
-    { h: "Detalle", f: r => esc(r.detail) },
-  ], a.decisions, "Sin decisiones registradas.");
+    { h: "Orden", f: r => esc(r.kind) },
+    { h: "Motivo", f: r => esc(r.reason) },
+  ], a.week_orders, "Esta semana no hay órdenes nuevas: no se compra, no se vende y no se mueve ningún stop.");
 
   const rej = (a.rejected || []).filter(r => r.market === "US");
   table("rejected", [

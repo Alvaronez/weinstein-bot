@@ -69,8 +69,14 @@ def test_r_w4_texto_de_cada_tipo_de_orden():
     state["positions"]["SUBE"]["stop"] = 85.0
     data = {"SPY": analyzed(STAGE2_SETUP), "SUBE": analyzed(trend), "FLOJA": analyzed(STAGE3),
             "CAE": analyzed(STAGE4), "NUEVA": analyzed(BREAKOUT, spike(BREAKOUT))}
-    executor.weekly_cycle(broker, data, {"NUEVA": "US"}, CFG, state, "2026-11-21")
+    out = executor.weekly_cycle(broker, data, {"NUEVA": "US"}, CFG, state, "2026-11-21")
     import re
+    semana = {(r["symbol"], re.split(r" (?:a|en) \d", r["kind"])[0]): r for r in out["week_orders"]}
+    assert semana[("NUEVA", "Compra tras ruptura confirmada")]["kind"].endswith("a 105,04 $ · stop en 92,22 $")
+    assert ("NUEVA", "Compra en retroceso") in semana and ("CAE", "Salida total") in semana
+    assert ("FLOJA", "Venta parcial (50 % de la posición)") in semana
+    assert semana[("SUBE", "Subir el stop de pérdidas")]["reason"].startswith("Estaba en 85,00 $")
+    assert [r["symbol"] for r in out["week_orders"]] == sorted(r["symbol"] for r in out["week_orders"])
     rows = {(r["symbol"], re.split(r" (?:a|en) \d", r["kind"])[0]): r
             for r in (report._order_row(o, state) for o in broker.open_orders())}
     assert rows[("NUEVA", "Compra tras ruptura confirmada")]["kind"].endswith("a 105,04 $")

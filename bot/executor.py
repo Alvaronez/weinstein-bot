@@ -111,6 +111,8 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
     orders = broker.open_orders()
     sync_fills(positions, state, today)
     decisions, rejected, europe = [], [], []
+    week_orders = []   # lo nuevo de esta semana, para la web (R-W4)
+    money = strategy.money
     reason_counts: dict[str, int] = {}
 
     # R-E7 · se cancelan las entradas no ejecutadas
@@ -148,6 +150,7 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
                 _sell_market(broker, sym, p["qty"], "exit")
                 exiting.add(sym)
                 st["last_sale"] = {"pct": 100, "reason": why}
+                week_orders.append({"symbol": sym, "kind": "Salida total", "reason": why})
                 decisions.append({"symbol": sym, "action": "Salida total", "detail": why})
                 continue
             n = 0
@@ -163,11 +166,17 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
                     _sell_market(broker, sym, rest, "exit")
                     exiting.add(sym)
                 st["last_sale"] = {"pct": round(n / p["qty"] * 100), "reason": why}
+                causa = "; ".join(x for x in d["reasons"] if not x.startswith("stop subido"))
+                week_orders.append({"symbol": sym, "reason": causa,
+                                    "kind": f"Venta parcial ({st['last_sale']['pct']} % de la posición)"})
                 decisions.append({"symbol": sym, "action": f"Reducir {d['fraction']:.0%}",
                                   "detail": f"venta de {n:g} títulos: {why}"})
             else:
                 st["stop"], note = ensure_stop(broker, p, d["stop"], orders)
                 decisions.append({"symbol": sym, "action": "Mantener", "detail": f"{why}; {note}"})
+            if sym not in exiting and before is not None and st["stop"] != before:
+                week_orders.append({"symbol": sym, "kind": f"Subir el stop de pérdidas a {money(st['stop'])}",
+                                    "reason": f"Estaba en {money(before)}; se sube tras la última corrección"})
         except Exception as exc:  # R-X4
             decisions.append({"symbol": sym, "action": "Error", "detail": str(exc)[:200]})
 
@@ -233,6 +242,10 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
                 try:
                     note = _submit_entry(broker, sym, half, o["limit"], s["stop"], o["kind"])
                     placed.append(f"{o['kind']} a {o['limit']:.2f}")
+                    nombre = ("Compra en retroceso" if o["kind"] == "retroceso"
+                              else "Compra tras ruptura confirmada")
+                    week_orders.append({"symbol": sym, "reason": s["reason"],
+                                        "kind": f"{nombre} a {money(o['limit'])} · stop en {money(s['stop'])}"})
                 except BrokerError as exc:
                     rejected.append({"symbol": sym, "market": "US",
                                      "reason": f"orden rechazada por Alpaca: {str(exc)[:120]}"})
@@ -251,6 +264,7 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
         "market": {"stage": market_stage,
                    **(strategy.snapshot(bench) if bench is not None else {})},
         "universe_size": len(markets),
+        "week_orders": sorted(week_orders, key=lambda r: r["symbol"]),
         "decisions": decisions,
         "rejected": rejected,
         "reason_counts": reason_counts,

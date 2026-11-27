@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from . import strategy
+
 MIN_WEEKS_JENSEN = 8
 MIN_DAYS_CAGR = 90
 
@@ -61,10 +63,7 @@ def performance(equity: pd.DataFrame, spy: pd.Series) -> dict:
     }
 
 
-def money(x: float, cur: str = "$") -> str:
-    """12345.6 → '12.345,60 $' (formato español, divisa del activo)."""
-    txt = f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
-    return f"{txt} {cur}"
+money = strategy.money
 
 
 def _order_row(o: dict, state: dict) -> dict:

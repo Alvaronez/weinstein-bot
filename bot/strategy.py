@@ -35,7 +35,8 @@ def snapshot(w: pd.DataFrame) -> dict:
     }
 
 
-def _eur(x: float) -> str:
+def money(x: float) -> str:
+    """12345.6 → '12.345,60 $'. Alpaca solo opera EE. UU.: las órdenes van en dólares."""
     return f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".") + " $"
 
 
@@ -61,11 +62,11 @@ def describe(w: pd.DataFrame, decision: dict, prev_stop: float | None, cfg: dict
     if decision["action"] == "exit":
         hecho = "Se vende toda la posición en la próxima apertura."
     elif decision["action"] == "reduce":
-        hecho = f"Esta semana se vende el {decision["fraction"] * 100:.0f} % de la posición y el stop queda en {_eur(stop)}."
+        hecho = f"Esta semana se vende el {decision["fraction"] * 100:.0f} % de la posición y el stop queda en {money(stop)}."
     elif prev_stop is not None and stop != prev_stop:
-        hecho = f"Esta semana se ha subido el stop de {_eur(prev_stop)} a {_eur(stop)} tras la última corrección."
+        hecho = f"Esta semana se ha subido el stop de {money(prev_stop)} a {money(stop)} tras la última corrección."
     else:
-        hecho = f"Esta semana no ha dado ninguna señal: no hay que mover nada y el stop sigue en {_eur(stop)}."
+        hecho = f"Esta semana no ha dado ninguna señal: no hay que mover nada y el stop sigue en {money(stop)}."
 
     if decision["action"] == "exit":
         vigila = ""

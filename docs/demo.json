@@ -696,7 +696,7 @@
    "flags": [
     "stage3"
    ],
-   "analysis": "Ha entrado en Fase 3 y la tendencia se agota: cotiza un 1 % por encima de su media de 30 semanas, que se ha aplanado, y se comporta mejor que el S&P 500. Esta semana se vende el 50 % de la posición y el stop queda en 97,03 $. Se vigila de cerca: si pasa a Fase 4 se venderá el resto. Revisada el 21/11/2026."
+   "analysis": "Ha entrado en Fase 3 y la tendencia se agota: cotiza un 1 % por encima de su media de 30 semanas, que se ha aplanado, y se comporta mejor que el S&P 500. Esta semana se vende el 50 % de la posición y el stop sube a 97,03 $. Se vigila de cerca: si pasa a Fase 4 se venderá el resto. Revisada el 21/11/2026."
   },
   {
    "symbol": "EJEMPLO5",
@@ -712,48 +712,7 @@
    "analysis": "Ha entrado en Fase 4, en tendencia bajista: cotiza un 6 % por debajo de su media de 30 semanas, que está cayendo, y se comporta peor que el S&P 500. Se vende toda la posición en la próxima apertura. Revisada el 21/11/2026."
   }
  ],
- "orders": [
-  {
-   "symbol": "EJEMPLO1",
-   "kind": "Stop de pérdidas en 108,21 $",
-   "reason": "Protege la posición abierta"
-  },
-  {
-   "symbol": "EJEMPLO2",
-   "kind": "Venta parcial (50 % de la posición)",
-   "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"
-  },
-  {
-   "symbol": "EJEMPLO2",
-   "kind": "Stop de pérdidas en 97,03 $",
-   "reason": "Protege la posición abierta"
-  },
-  {
-   "symbol": "EJEMPLO3",
-   "kind": "Compra tras ruptura confirmada a 105,04 $",
-   "reason": "Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
-  },
-  {
-   "symbol": "EJEMPLO3",
-   "kind": "Stop de pérdidas en 92,22 $",
-   "reason": "Se activará si la compra se ejecuta"
-  },
-  {
-   "symbol": "EJEMPLO4",
-   "kind": "Compra en retroceso a 48,68 $",
-   "reason": "Fase 2; rompió 48.20 (2 toques) hace 2 sem. con 2.1× de volumen; MRS +12.3; siguiente resistencia 61.40"
-  },
-  {
-   "symbol": "EJEMPLO4",
-   "kind": "Stop de pérdidas en 42,90 $",
-   "reason": "Se activará si la compra se ejecuta"
-  },
-  {
-   "symbol": "EJEMPLO5",
-   "kind": "Salida total",
-   "reason": "Fase 4: cierre bajo la MM30 descendente"
-  }
- ],
+ "orders": [],
  "trades": [
   {
    "date": "2026-11-17",
@@ -783,6 +742,33 @@
    "stage": 2
   },
   "universe_size": 588,
+  "week_orders": [
+   {
+    "symbol": "EJEMPLO2",
+    "kind": "Venta parcial (50 % de la posición)",
+    "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"
+   },
+   {
+    "symbol": "EJEMPLO2",
+    "kind": "Subir el stop de pérdidas a 97,03 $",
+    "reason": "Estaba en 84,00 $; se sube tras la última corrección"
+   },
+   {
+    "symbol": "EJEMPLO3",
+    "kind": "Compra tras ruptura confirmada a 105,04 $ · stop en 92,22 $",
+    "reason": "Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
+   },
+   {
+    "symbol": "EJEMPLO4",
+    "kind": "Compra en retroceso a 48,68 $ · stop en 42,90 $",
+    "reason": "Fase 2; rompió 48.20 (2 toques) hace 2 sem. con 2.1× de volumen; MRS +12.3; siguiente resistencia 61.40"
+   },
+   {
+    "symbol": "EJEMPLO5",
+    "kind": "Salida total",
+    "reason": "Fase 4: cierre bajo la MM30 descendente"
+   }
+  ],
   "decisions": [
    {
     "symbol": "EJEMPLO3",
