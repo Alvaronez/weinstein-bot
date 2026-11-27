@@ -680,7 +680,8 @@
    "stage": 2,
    "stop": 108.21,
    "entry_date": "2026-07-31",
-   "flags": []
+   "flags": [],
+   "analysis": "Fase 2: tendencia alcista; precio un 14 % por encima de la MM30 (ascendente); fuerza relativa positiva (+18,4)"
   },
   {
    "symbol": "EJEMPLO2",
@@ -694,7 +695,8 @@
    "entry_date": "2026-03-06",
    "flags": [
     "stage3"
-   ]
+   ],
+   "analysis": "Fase 3: la tendencia se agota; precio un 1 % por encima de la MM30 (plana); fuerza relativa positiva (+2,1); posición reducida por Fase 3"
   },
   {
    "symbol": "EJEMPLO5",
@@ -706,7 +708,8 @@
    "stage": 4,
    "stop": 43.8,
    "entry_date": "2026-09-14",
-   "flags": []
+   "flags": [],
+   "analysis": "Fase 4: tendencia bajista; precio un 6 % por debajo de la MM30 (descendente); fuerza relativa negativa (−7,3)"
   }
  ],
  "orders": [

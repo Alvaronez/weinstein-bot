@@ -109,6 +109,7 @@ def build(broker, state: dict, analysis: dict, equity: pd.DataFrame, spy: pd.Ser
             "pnl_pct": round((p["current_price"] / p["avg_entry_price"] - 1) * 100, 2),
             "weight_pct": round(value / acct["equity"] * 100, 1),
             "stage": st.get("stage"), "stop": st.get("stop"),
+            "analysis": st.get("analysis") or "Pendiente del análisis del próximo fin de semana",
             "entry_date": st.get("entry_date"), "flags": st.get("flags", []),
         })
     trades = [{"symbol": o["symbol"], "side": o["side"], "qty": o["filled_qty"],

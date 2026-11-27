@@ -35,6 +35,26 @@ def snapshot(w: pd.DataFrame) -> dict:
     }
 
 
+STAGE_TEXT = {1: "Fase 1: formando suelo", 2: "Fase 2: tendencia alcista",
+              3: "Fase 3: la tendencia se agota", 4: "Fase 4: tendencia bajista"}
+FLAG_TEXT = {"stage3": "posición reducida por Fase 3", "rs": "posición reducida por fuerza relativa débil"}
+
+
+def describe(w: pd.DataFrame, flags: list[str], cfg: dict) -> str:
+    """Análisis en una línea de una posición abierta, para la web (R-W5)."""
+    r = w.iloc[-1]
+    thr = cfg["stages"]["flat_threshold"]
+    gap = (r["close"] / r["sma"] - 1) * 100
+    ma = "ascendente" if r["slope"] > thr else "descendente" if r["slope"] < -thr else "plana"
+    parts = [STAGE_TEXT.get(int(r["stage"]), "sin datos"),
+             f"precio un {abs(gap):.0f} % por {'encima' if gap >= 0 else 'debajo'} de la MM30 ({ma})"]
+    if not pd.isna(r["mrs"]):
+        mrs = f"{r['mrs']:+.1f}".replace(".", ",")
+        parts.append(f"fuerza relativa {'positiva' if r['mrs'] > 0 else 'negativa'} ({mrs})")
+    parts += [FLAG_TEXT[f] for f in flags if f in FLAG_TEXT]
+    return "; ".join(parts)
+
+
 def round_price(p: float) -> float:
     return round(p, 2) if p >= 1 else round(p, 4)
 

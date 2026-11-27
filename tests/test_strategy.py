@@ -101,3 +101,9 @@ def test_r_s3_y_r_s4_el_stop_sube_y_nunca_baja():
     assert d["stop"] > 85 and d["stop"] < w["close"].iloc[-1]
     alto = strategy.manage(w, pos(w, stop=125, flags=[], weeks_ago=17), CFG)
     assert alto["stop"] == 125
+
+
+def test_r_w5_analisis_de_la_posicion():
+    txt = strategy.describe(analyzed(STAGE3), ["stage3"], CFG)
+    assert txt.startswith("Fase 3") and "MM30" in txt and txt.endswith("posición reducida por Fase 3")
+    assert strategy.describe(analyzed(STAGE4), [], CFG).startswith("Fase 4: tendencia bajista; precio un")

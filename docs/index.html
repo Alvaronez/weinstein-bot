@@ -93,8 +93,6 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const num = (x, d = 2) => x == null ? "—" : Number(x).toLocaleString("es-ES", { minimumFractionDigits: d, maximumFractionDigits: d });
 const pct = (x, d = 2) => x == null ? "—" : (x > 0 ? "+" : x < 0 ? "−" : "") + num(Math.abs(x), d) + " %";
 const sign = x => x == null || x === 0 ? "" : x > 0 ? "pos" : "neg";
-const fase = s => s ? `<span class="chip">Fase ${s}</span>` : "—";
-const FLAGS = { stage3: "reducida por Fase 3", rs: "reducida por fuerza relativa" };
 
 function table(el, cols, rows, empty) {
   if (!rows || !rows.length) { $(el).innerHTML = `<div class="empty">${empty}</div>`; return; }
@@ -192,15 +190,9 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
 
   table("positions", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Fase", f: r => fase(r.stage) },
-    { h: "Títulos", n: 1, f: r => num(r.qty, 0) },
     { h: "Precio medio", n: 1, f: r => num(r.avg) + " $" },
-    { h: "Precio", n: 1, f: r => num(r.price) + " $" },
-    { h: "Resultado", n: 1, cls: r => sign(r.pnl_pct), f: r => pct(r.pnl_pct) },
     { h: "Stop", n: 1, f: r => r.stop == null ? "—" : num(r.stop) + " $" },
-    { h: "Peso", n: 1, f: r => num(r.weight_pct, 1) + " %" },
-    { h: "Entrada", f: r => esc(r.entry_date) },
-    { h: "Notas", f: r => esc((r.flags || []).map(f => FLAGS[f]).filter(Boolean).join(", ")) },
+    { h: "Análisis", f: r => esc(r.analysis) },
   ], d.positions, "Sin posiciones abiertas.");
 
   const mk = a.market || {};

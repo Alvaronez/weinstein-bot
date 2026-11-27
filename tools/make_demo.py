@@ -28,11 +28,14 @@ def main():
         **perf,
         "positions": [
             {"symbol": "EJEMPLO1", "qty": 80, "avg": 101.6, "price": 134.0, "pnl_pct": 31.89, "weight_pct": 10.2,
-             "stage": 2, "stop": 108.21, "entry_date": "2026-07-31", "flags": []},
+             "stage": 2, "stop": 108.21, "entry_date": "2026-07-31", "flags": [],
+             "analysis": "Fase 2: tendencia alcista; precio un 14 % por encima de la MM30 (ascendente); fuerza relativa positiva (+18,4)"},
             {"symbol": "EJEMPLO2", "qty": 100, "avg": 92.0, "price": 100.0, "pnl_pct": 8.7, "weight_pct": 9.5,
-             "stage": 3, "stop": 97.03, "entry_date": "2026-03-06", "flags": ["stage3"]},
+             "stage": 3, "stop": 97.03, "entry_date": "2026-03-06", "flags": ["stage3"],
+             "analysis": "Fase 3: la tendencia se agota; precio un 1 % por encima de la MM30 (plana); fuerza relativa positiva (+2,1); posición reducida por Fase 3"},
             {"symbol": "EJEMPLO5", "qty": 150, "avg": 49.1, "price": 44.3, "pnl_pct": -9.78, "weight_pct": 6.3,
-             "stage": 4, "stop": 43.8, "entry_date": "2026-09-14", "flags": []},
+             "stage": 4, "stop": 43.8, "entry_date": "2026-09-14", "flags": [],
+             "analysis": "Fase 4: tendencia bajista; precio un 6 % por debajo de la MM30 (descendente); fuerza relativa negativa (−7,3)"},
         ],
         "orders": [
             {"symbol": "EJEMPLO1", "kind": "Stop de pérdidas en 108,21 $",
