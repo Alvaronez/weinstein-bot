@@ -35,24 +35,49 @@ def snapshot(w: pd.DataFrame) -> dict:
     }
 
 
-STAGE_TEXT = {1: "Fase 1: formando suelo", 2: "Fase 2: tendencia alcista",
-              3: "Fase 3: la tendencia se agota", 4: "Fase 4: tendencia bajista"}
-FLAG_TEXT = {"stage3": "posición reducida por Fase 3", "rs": "posición reducida por fuerza relativa débil"}
+def _eur(x: float) -> str:
+    return f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".") + " $"
 
 
-def describe(w: pd.DataFrame, flags: list[str], cfg: dict) -> str:
-    """Análisis en una línea de una posición abierta, para la web (R-W5)."""
+def describe(w: pd.DataFrame, decision: dict, prev_stop: float | None, cfg: dict, today: str) -> str:
+    """Breve análisis de una posición abierta para la web (R-W5).
+
+    Tres frases: cómo está el valor, qué se ha hecho esta semana (aunque sea nada)
+    y qué se está vigilando.
+    """
     r = w.iloc[-1]
+    stage, flags = int(r["stage"]), decision["flags"]
     thr = cfg["stages"]["flat_threshold"]
     gap = (r["close"] / r["sma"] - 1) * 100
-    ma = "ascendente" if r["slope"] > thr else "descendente" if r["slope"] < -thr else "plana"
-    parts = [STAGE_TEXT.get(int(r["stage"]), "sin datos"),
-             f"precio un {abs(gap):.0f} % por {'encima' if gap >= 0 else 'debajo'} de la MM30 ({ma})"]
-    if not pd.isna(r["mrs"]):
-        mrs = f"{r['mrs']:+.1f}".replace(".", ",")
-        parts.append(f"fuerza relativa {'positiva' if r['mrs'] > 0 else 'negativa'} ({mrs})")
-    parts += [FLAG_TEXT[f] for f in flags if f in FLAG_TEXT]
-    return "; ".join(parts)
+    ma = "sigue subiendo" if r["slope"] > thr else "está cayendo" if r["slope"] < -thr else "se ha aplanado"
+    lado = "por encima" if gap >= 0 else "por debajo"
+    rs_ok = not pd.isna(r["mrs"]) and r["mrs"] > 0
+    rs = "se comporta mejor que el S&P 500" if rs_ok else "se comporta peor que el S&P 500"
+    estado = {2: "Sigue en Fase 2, en tendencia alcista", 3: "Ha entrado en Fase 3 y la tendencia se agota",
+              4: "Ha entrado en Fase 4, en tendencia bajista", 1: "Está en Fase 1, formando suelo"}[stage]
+    situacion = f"{estado}: cotiza un {abs(gap):.0f} % {lado} de su media de 30 semanas, que {ma}, y {rs}."
+
+    stop = decision["stop"]
+    if decision["action"] == "exit":
+        hecho = "Se vende toda la posición en la próxima apertura."
+    elif decision["action"] == "reduce":
+        hecho = f"Esta semana se vende el {decision["fraction"] * 100:.0f} % de la posición y el stop queda en {_eur(stop)}."
+    elif prev_stop is not None and stop != prev_stop:
+        hecho = f"Esta semana se ha subido el stop de {_eur(prev_stop)} a {_eur(stop)} tras la última corrección."
+    else:
+        hecho = f"Esta semana no ha dado ninguna señal: no hay que mover nada y el stop sigue en {_eur(stop)}."
+
+    if decision["action"] == "exit":
+        vigila = ""
+    elif stage == 3:
+        vigila = "Se vigila de cerca: si pasa a Fase 4 se venderá el resto."
+    elif not rs_ok and "rs" not in flags:
+        vigila = "Se vigila su fuerza relativa: si sigue negativa otra semana se reducirá la posición."
+    else:
+        vigila = "Se sigue vigilando que mantenga la media de 30 semanas y su fuerza frente al índice."
+
+    fecha = "/".join(reversed(today.split("-")))
+    return " ".join(x for x in (situacion, hecho, vigila, f"Revisada el {fecha}.") if x)
 
 
 def round_price(p: float) -> float:

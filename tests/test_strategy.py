@@ -104,6 +104,20 @@ def test_r_s3_y_r_s4_el_stop_sube_y_nunca_baja():
 
 
 def test_r_w5_analisis_de_la_posicion():
-    txt = strategy.describe(analyzed(STAGE3), ["stage3"], CFG)
-    assert txt.startswith("Fase 3") and "MM30" in txt and txt.endswith("posición reducida por Fase 3")
-    assert strategy.describe(analyzed(STAGE4), [], CFG).startswith("Fase 4: tendencia bajista; precio un")
+    hoy = "2026-11-21"
+    w = analyzed(STAGE2_SETUP)
+    quieta = strategy.describe(w, strategy.manage(w, pos(w, stop=93, flags=[]), CFG), 93, CFG, hoy)
+    assert quieta.startswith("Sigue en Fase 2") and "no ha dado ninguna señal" in quieta
+    assert "el stop sigue en 93,00 $" in quieta and quieta.endswith("Revisada el 21/11/2026.")
+
+    w = analyzed(STAGE2_SETUP + ramp(103, 130, 12) + [124, 121, 126, 131, 134])
+    sube = strategy.describe(w, strategy.manage(w, pos(w, stop=85, weeks_ago=17), CFG), 85, CFG, hoy)
+    assert "se ha subido el stop de 85,00 $ a " in sube
+
+    w = analyzed(STAGE3)
+    floja = strategy.describe(w, strategy.manage(w, pos(w, stop=50), CFG), 50, CFG, hoy)
+    assert floja.startswith("Ha entrado en Fase 3") and "se vende el 50 %" in floja and "Fase 4" in floja
+
+    w = analyzed(STAGE4)
+    fuera = strategy.describe(w, strategy.manage(w, pos(w, stop=50), CFG), 50, CFG, hoy)
+    assert "Se vende toda la posición" in fuera and "vigila" not in fuera

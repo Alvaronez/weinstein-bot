@@ -141,7 +141,7 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
             if before is not None and d["stop"] != before:
                 st["stop_moved"] = [before, d["stop"]]
             st["stage"] = int(w["stage"].iloc[-1])
-            st["analysis"] = strategy.describe(w, d["flags"], cfg)
+            st["analysis"] = strategy.describe(w, d, before, cfg, today)
             why = "; ".join(d["reasons"])
             if d["action"] == "exit":
                 _cancel_sells(broker, sym, orders)
