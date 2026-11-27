@@ -78,7 +78,6 @@
 
   <section class="card"><h2>Posiciones abiertas</h2><div class="sub">Todas se revisan cada fin de semana, haya señal o no</div><div class="scroll" id="positions"></div></section>
   <section class="card"><h2>Nuevas órdenes de la semana</h2><div class="sub" id="market"></div><div class="scroll" id="orders"></div></section>
-  <section class="card"><h2>Órdenes que no se colocaron</h2><div class="sub">Valores en Fase 2 descartados y el motivo</div><div class="scroll" id="rejected"></div><div class="sub" id="counts" style="margin-top:8px"></div></section>
   <div class="cols">
     <section class="card"><h2>Señales en Europa</h2><div class="sub">STOXX 600 · solo aviso, sin ejecución</div><div class="scroll" id="europe"></div></section>
     <section class="card"><h2>Últimas ejecuciones</h2><div class="scroll" id="trades"></div></section>
@@ -198,15 +197,6 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
     { h: "Orden", f: r => esc(r.kind) },
     { h: "Motivo", f: r => esc(r.reason) },
   ], a.week_orders, "Esta semana no hay órdenes nuevas: no se compra, no se vende y no se mueve ningún stop.");
-
-  const rej = (a.rejected || []).filter(r => r.market === "US");
-  table("rejected", [
-    { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Motivo por el que no se colocó la orden", f: r => esc(r.reason) },
-  ], rej.slice(0, 60), "Ningún candidato descartado.");
-  const rc = Object.entries(a.reason_counts || {}).sort((x, y) => y[1] - x[1]);
-  $("counts").textContent = (rej.length > 60 ? `Se muestran 60 de ${rej.length}. ` : "") +
-    (rc.length ? "Resto del universo: " + rc.map(([k, v]) => `${v} ${k}`).join(" · ") : "");
 
   table("europe", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
