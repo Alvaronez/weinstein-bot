@@ -37,7 +37,7 @@ serán visibles para cualquiera con el enlace. Las claves no se guardan nunca en
 pip install -r requirements.txt
 pytest -q                              # 38 tests con series sintéticas
 python -m bot.run_weekly --dry-run     # sin claves simula una cuenta de 100.000 $
-python -m tools.make_demo              # regenera los datos de ejemplo del panel
+python -m tools.make_demo              # regenera docs/demo.json (se ve en …/?demo)
 ```
 
 Para ver el panel en local: `python -m http.server -d docs` y abre http://localhost:8000.

@@ -25,6 +25,7 @@
   h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
   h2 { font-size: 16px; margin: 0 0 4px; }
   .sub { color: var(--ink2); font-size: 13px; }
+  a { color: var(--bot); }
   .banner { background: var(--chip); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
   .card { background: var(--surface); border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;
           border: 1px solid var(--grid); }
@@ -171,10 +172,14 @@ function chart(curve) {
     pts.slice().reverse(), "");
 }
 
-fetch("data.json?" + Date.now()).then(r => r.json()).then(d => {
+const DEMO = new URLSearchParams(location.search).has("demo");
+fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).then(d => {
   const a = d.analysis || {}, s = d.summary;
   $("updated").textContent = "Actualizado " + d.updated;
-  if (d.demo) $("banner").innerHTML = '<div class="banner">Datos de ejemplo. Se sustituirán en la primera ejecución real del bot.</div>';
+  $("banner").innerHTML = d.demo
+    ? '<div class="banner">Datos de ejemplo para ver la estructura de la página. <a href="./">Ver los datos reales</a></div>'
+    : (d.positions.length || d.orders.length) ? ""
+    : '<div class="banner">El bot todavía no tiene posiciones ni órdenes. <a href="?demo">Ver la página con datos de ejemplo</a></div>';
   kpis(s, d.cash);
   $("chart-sub").textContent = `Base 100 el ${s.start_date}`;
   chart(d.curve);
