@@ -81,6 +81,7 @@ def main():
             ],
         },
     }
+    data["orders"].sort(key=lambda r: r["symbol"])
     out = config.ROOT / "docs" / "demo.json"
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 

@@ -119,7 +119,8 @@ def build(broker, state: dict, analysis: dict, equity: pd.DataFrame, spy: pd.Ser
         "cash": round(acct["cash"], 2),
         **perf,
         "positions": sorted(positions, key=lambda x: -x["weight_pct"]),
-        "orders": [_order_row(o, state) for o in broker.open_orders()],
+        "orders": sorted((_order_row(o, state) for o in broker.open_orders()),
+                         key=lambda r: r["symbol"]),   # por valor; dentro de cada uno, orden de envío
         "trades": trades,
         "analysis": analysis,
     }

@@ -711,6 +711,21 @@
  ],
  "orders": [
   {
+   "symbol": "EJEMPLO1",
+   "kind": "Stop de pérdidas en 108,21 $",
+   "reason": "Stop subido de 91,50 $ a 108,21 $"
+  },
+  {
+   "symbol": "EJEMPLO2",
+   "kind": "Venta parcial (50 % de la posición)",
+   "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"
+  },
+  {
+   "symbol": "EJEMPLO2",
+   "kind": "Stop de pérdidas en 97,03 $",
+   "reason": "Protege la posición abierta"
+  },
+  {
    "symbol": "EJEMPLO4",
    "kind": "Compra tras ruptura confirmada a 105,04 $",
    "reason": "Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
@@ -729,21 +744,6 @@
    "symbol": "EJEMPLO4",
    "kind": "Stop de pérdidas en 92,22 $",
    "reason": "Se activará si la compra se ejecuta"
-  },
-  {
-   "symbol": "EJEMPLO1",
-   "kind": "Stop de pérdidas en 108,21 $",
-   "reason": "Stop subido de 91,50 $ a 108,21 $"
-  },
-  {
-   "symbol": "EJEMPLO2",
-   "kind": "Venta parcial (50 % de la posición)",
-   "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"
-  },
-  {
-   "symbol": "EJEMPLO2",
-   "kind": "Stop de pérdidas en 97,03 $",
-   "reason": "Protege la posición abierta"
   },
   {
    "symbol": "EJEMPLO5",
