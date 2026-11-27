@@ -697,15 +697,15 @@
    ]
   },
   {
-   "symbol": "EJEMPLO3",
+   "symbol": "EJEMPLO5",
    "qty": 150,
    "avg": 49.1,
-   "price": 47.3,
-   "pnl_pct": -3.67,
-   "weight_pct": 6.7,
-   "stage": 2,
+   "price": 44.3,
+   "pnl_pct": -9.78,
+   "weight_pct": 6.3,
+   "stage": 4,
    "stop": 43.8,
-   "entry_date": "2026-11-09",
+   "entry_date": "2026-09-14",
    "flags": []
   }
  ],
@@ -726,23 +726,23 @@
    "reason": "Protege la posición abierta"
   },
   {
-   "symbol": "EJEMPLO4",
+   "symbol": "EJEMPLO3",
    "kind": "Compra tras ruptura confirmada a 105,04 $",
    "reason": "Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
   },
   {
-   "symbol": "EJEMPLO4",
+   "symbol": "EJEMPLO3",
    "kind": "Stop de pérdidas en 92,22 $",
    "reason": "Se activará si la compra se ejecuta"
   },
   {
    "symbol": "EJEMPLO4",
-   "kind": "Compra en retroceso a 102,01 $",
-   "reason": "Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
+   "kind": "Compra en retroceso a 48,68 $",
+   "reason": "Fase 2; rompió 48.20 (2 toques) hace 2 sem. con 2.1× de volumen; MRS +12.3; siguiente resistencia 61.40"
   },
   {
    "symbol": "EJEMPLO4",
-   "kind": "Stop de pérdidas en 92,22 $",
+   "kind": "Stop de pérdidas en 42,90 $",
    "reason": "Se activará si la compra se ejecuta"
   },
   {
@@ -760,18 +760,18 @@
    "price": 99.4
   },
   {
-   "date": "2026-11-10",
-   "symbol": "EJEMPLO3",
+   "date": "2026-09-14",
+   "symbol": "EJEMPLO5",
    "side": "buy",
    "qty": 150,
    "price": 49.1
   },
   {
-   "date": "2026-11-03",
-   "symbol": "EJEMPLO5",
-   "side": "sell",
-   "qty": 60,
-   "price": 71.25
+   "date": "2026-07-31",
+   "symbol": "EJEMPLO1",
+   "side": "buy",
+   "qty": 80,
+   "price": 101.6
   }
  ],
  "analysis": {
@@ -782,9 +782,9 @@
   "universe_size": 588,
   "decisions": [
    {
-    "symbol": "EJEMPLO4",
+    "symbol": "EJEMPLO3",
     "action": "Orden de compra",
-    "detail": "36 títulos por compra: confirmación a 105.04 y retroceso a 102.01; stop de pérdidas 92.22 (con stop asociado). Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
+    "detail": "36 títulos: confirmación a 105.04; stop de pérdidas 92.22 (con stop asociado). Fase 2; rompió 101.00 (3 toques) esta semana con 2.5× de volumen; MRS +24.5; subida libre"
    },
    {
     "symbol": "EJEMPLO2",

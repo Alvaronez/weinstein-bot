@@ -31,34 +31,33 @@ def main():
              "stage": 2, "stop": 108.21, "entry_date": "2026-07-31", "flags": []},
             {"symbol": "EJEMPLO2", "qty": 100, "avg": 92.0, "price": 100.0, "pnl_pct": 8.7, "weight_pct": 9.5,
              "stage": 3, "stop": 97.03, "entry_date": "2026-03-06", "flags": ["stage3"]},
-            {"symbol": "EJEMPLO3", "qty": 150, "avg": 49.1, "price": 47.3, "pnl_pct": -3.67, "weight_pct": 6.7,
-             "stage": 2, "stop": 43.8, "entry_date": "2026-11-09", "flags": []},
+            {"symbol": "EJEMPLO5", "qty": 150, "avg": 49.1, "price": 44.3, "pnl_pct": -9.78, "weight_pct": 6.3,
+             "stage": 4, "stop": 43.8, "entry_date": "2026-09-14", "flags": []},
         ],
         "orders": [
-            {"symbol": "EJEMPLO4", "kind": "Compra tras ruptura confirmada a 105,04 $", "reason": R1},
-            {"symbol": "EJEMPLO4", "kind": "Stop de pérdidas en 92,22 $", "reason": "Se activará si la compra se ejecuta"},
-            {"symbol": "EJEMPLO4", "kind": "Compra en retroceso a 102,01 $", "reason": R1},
-            {"symbol": "EJEMPLO4", "kind": "Stop de pérdidas en 92,22 $", "reason": "Se activará si la compra se ejecuta"},
             {"symbol": "EJEMPLO1", "kind": "Stop de pérdidas en 108,21 $",
              "reason": "Stop subido de 91,50 $ a 108,21 $"},
             {"symbol": "EJEMPLO2", "kind": "Venta parcial (50 % de la posición)",
              "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"},
             {"symbol": "EJEMPLO2", "kind": "Stop de pérdidas en 97,03 $", "reason": "Protege la posición abierta"},
+            {"symbol": "EJEMPLO3", "kind": "Compra tras ruptura confirmada a 105,04 $", "reason": R1},
+            {"symbol": "EJEMPLO3", "kind": "Stop de pérdidas en 92,22 $", "reason": "Se activará si la compra se ejecuta"},
+            {"symbol": "EJEMPLO4", "kind": "Compra en retroceso a 48,68 $", "reason": R2},
+            {"symbol": "EJEMPLO4", "kind": "Stop de pérdidas en 42,90 $", "reason": "Se activará si la compra se ejecuta"},
             {"symbol": "EJEMPLO5", "kind": "Salida total", "reason": "Fase 4: cierre bajo la MM30 descendente"},
         ],
         "trades": [
             {"date": "2026-11-17", "symbol": "EJEMPLO2", "side": "sell", "qty": 50, "price": 99.4},
-            {"date": "2026-11-10", "symbol": "EJEMPLO3", "side": "buy", "qty": 150, "price": 49.1},
-            {"date": "2026-11-03", "symbol": "EJEMPLO5", "side": "sell", "qty": 60, "price": 71.25},
+            {"date": "2026-09-14", "symbol": "EJEMPLO5", "side": "buy", "qty": 150, "price": 49.1},
+            {"date": "2026-07-31", "symbol": "EJEMPLO1", "side": "buy", "qty": 80, "price": 101.6},
         ],
         "analysis": {
             "date": "2026-11-21",
             "market": {"stage": 2},
             "universe_size": 588,
             "decisions": [
-                {"symbol": "EJEMPLO4", "action": "Orden de compra",
-                 "detail": f"36 títulos por compra: confirmación a 105.04 y retroceso a 102.01; "
-                           f"stop de pérdidas 92.22 (con stop asociado). {R1}"},
+                {"symbol": "EJEMPLO3", "action": "Orden de compra",
+                 "detail": f"36 títulos: confirmación a 105.04; stop de pérdidas 92.22 (con stop asociado). {R1}"},
                 {"symbol": "EJEMPLO2", "action": "Reducir 50%",
                  "detail": "venta de 50 títulos: entra en Fase 3 (la MM30 se aplana o el precio la pierde)"},
                 {"symbol": "EJEMPLO1", "action": "Mantener",
@@ -81,7 +80,6 @@ def main():
             ],
         },
     }
-    data["orders"].sort(key=lambda r: r["symbol"])
     out = config.ROOT / "docs" / "demo.json"
     out.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
