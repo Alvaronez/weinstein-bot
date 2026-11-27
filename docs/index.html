@@ -194,10 +194,10 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
     { h: "Fase", f: r => fase(r.stage) },
     { h: "Títulos", n: 1, f: r => num(r.qty, 0) },
-    { h: "Precio medio", n: 1, f: r => num(r.avg) },
-    { h: "Precio", n: 1, f: r => num(r.price) },
+    { h: "Precio medio", n: 1, f: r => num(r.avg) + " $" },
+    { h: "Precio", n: 1, f: r => num(r.price) + " $" },
     { h: "Resultado", n: 1, cls: r => sign(r.pnl_pct), f: r => pct(r.pnl_pct) },
-    { h: "Stop", n: 1, f: r => num(r.stop) },
+    { h: "Stop", n: 1, f: r => r.stop == null ? "—" : num(r.stop) + " $" },
     { h: "Peso", n: 1, f: r => num(r.weight_pct, 1) + " %" },
     { h: "Entrada", f: r => esc(r.entry_date) },
     { h: "Notas", f: r => esc((r.flags || []).map(f => FLAGS[f]).filter(Boolean).join(", ")) },
@@ -225,8 +225,8 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
 
   table("europe", [
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
-    { h: "Compra", n: 1, f: r => num(r.entry) },
-    { h: "Stop", n: 1, f: r => num(r.stop) },
+    { h: "Compra", n: 1, f: r => num(r.entry) + " " + esc(r.currency || "") },
+    { h: "Stop", n: 1, f: r => num(r.stop) + " " + esc(r.currency || "") },
     { h: "MRS", n: 1, f: r => num(r.mrs, 1) },
   ], a.europe_signals, "Sin señales esta semana.");
 
@@ -235,7 +235,7 @@ fetch((DEMO ? "demo.json?" : "data.json?") + Date.now()).then(r => r.json()).the
     { h: "Valor", cls: () => "sym", f: r => esc(r.symbol) },
     { h: "Operación", f: r => r.side === "buy" ? "Compra" : "Venta" },
     { h: "Títulos", n: 1, f: r => num(r.qty, 0) },
-    { h: "Precio", n: 1, f: r => num(r.price) },
+    { h: "Precio", n: 1, f: r => num(r.price) + " $" },
   ], d.trades, "Todavía no hay ejecuciones.");
 }).catch(e => { $("banner").innerHTML = `<div class="banner">No se pudo cargar data.json (${esc(e.message)}).</div>`; });
 </script>

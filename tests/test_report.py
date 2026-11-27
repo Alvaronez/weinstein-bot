@@ -45,7 +45,7 @@ def test_r_w4_data_json(tmp_path):
     spy = pd.Series([500.0], index=pd.to_datetime(["2026-11-20"]))
     report.build(broker, state, {}, eq, spy, tmp_path / "data.json")
     d = json.loads((tmp_path / "data.json").read_text(encoding="utf-8"))
-    assert d["orders"][0]["kind"] == "Stop de pérdidas" and d["orders"][0]["stop_price"] == 95.0
+    assert d["orders"][0]["kind"] == "Stop de pérdidas en 95,00 $"                 # R-W4
     assert d["positions"][0]["pnl_pct"] == 10.0 and d["summary"]["return_pct"] == 0.0
 
 
@@ -55,3 +55,33 @@ def test_r_u2_velas_semanales_descartan_la_semana_en_curso():
     w = data.to_weekly(daily, dt.date(2026, 11, 25))            # miércoles
     assert w.index[-1] == pd.Timestamp("2026-11-20") and w["volume"].iloc[-1] == 50
     assert data.to_weekly(daily, dt.date(2026, 11, 28)).index[-1] == pd.Timestamp("2026-11-27")
+
+
+def test_r_w4_texto_de_cada_tipo_de_orden():
+    from bot import executor
+    from .helpers import BREAKOUT, CFG, STAGE2_SETUP, STAGE3, STAGE4, analyzed, ramp, spike
+
+    trend = STAGE2_SETUP + ramp(103, 130, 12) + [124, 121, 126, 131, 134]
+    pos = lambda sym, qty, price: {"symbol": sym, "qty": float(qty), "avg_entry_price": 90.0, "current_price": price}
+    broker = SimBroker(positions=[pos("SUBE", 80, 134.0), pos("FLOJA", 100, 100.0), pos("CAE", 10, 60.0)])
+    state = {"positions": {s: {"stop": 50.0, "entry_date": "2026-07-31", "flags": []}
+                           for s in ("SUBE", "FLOJA", "CAE")}, "pending": {}}
+    state["positions"]["SUBE"]["stop"] = 85.0
+    data = {"SPY": analyzed(STAGE2_SETUP), "SUBE": analyzed(trend), "FLOJA": analyzed(STAGE3),
+            "CAE": analyzed(STAGE4), "NUEVA": analyzed(BREAKOUT, spike(BREAKOUT))}
+    executor.weekly_cycle(broker, data, {"NUEVA": "US"}, CFG, state, "2026-11-21")
+    import re
+    rows = {(r["symbol"], re.split(r" (?:a|en) \d", r["kind"])[0]): r
+            for r in (report._order_row(o, state) for o in broker.open_orders())}
+    assert rows[("NUEVA", "Compra tras ruptura confirmada")]["kind"].endswith("a 105,04 $")
+    assert rows[("NUEVA", "Compra en retroceso")]["kind"].endswith("a 102,01 $")
+    assert rows[("FLOJA", "Venta parcial (50 % de la posición)")]["reason"].startswith("entra en Fase 3")
+    assert rows[("CAE", "Salida total")]["reason"].startswith("Fase 4")
+    sube = rows[("SUBE", "Stop de pérdidas")]
+    assert sube["reason"].startswith("Stop subido de 85,00 $ a ") and sube["kind"].endswith(" $")
+
+
+def test_divisa_del_activo():
+    from bot.broker import currency
+    assert [currency(t) for t in ("AAPL", "BRK-B", "SAP.DE", "SHEL.L", "NESN.SW", "SAN.MC")] == [
+        "$", "$", "€", "p", "CHF", "€"]

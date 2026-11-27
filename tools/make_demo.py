@@ -35,9 +35,16 @@ def main():
              "stage": 2, "stop": 43.8, "entry_date": "2026-11-09", "flags": []},
         ],
         "orders": [
-            {"symbol": "EJEMPLO4", "kind": "Compra tras ruptura confirmada", "reason": R1},
-            {"symbol": "EJEMPLO4", "kind": "Compra en retroceso", "reason": R1},
-            {"symbol": "EJEMPLO1", "kind": "Stop de pérdidas", "reason": "Protege la posición abierta"},
+            {"symbol": "EJEMPLO4", "kind": "Compra tras ruptura confirmada a 105,04 $", "reason": R1},
+            {"symbol": "EJEMPLO4", "kind": "Stop de pérdidas en 92,22 $", "reason": "Se activará si la compra se ejecuta"},
+            {"symbol": "EJEMPLO4", "kind": "Compra en retroceso a 102,01 $", "reason": R1},
+            {"symbol": "EJEMPLO4", "kind": "Stop de pérdidas en 92,22 $", "reason": "Se activará si la compra se ejecuta"},
+            {"symbol": "EJEMPLO1", "kind": "Stop de pérdidas en 108,21 $",
+             "reason": "Stop subido de 91,50 $ a 108,21 $"},
+            {"symbol": "EJEMPLO2", "kind": "Venta parcial (50 % de la posición)",
+             "reason": "entra en Fase 3 (la MM30 se aplana o el precio la pierde)"},
+            {"symbol": "EJEMPLO2", "kind": "Stop de pérdidas en 97,03 $", "reason": "Protege la posición abierta"},
+            {"symbol": "EJEMPLO5", "kind": "Salida total", "reason": "Fase 4: cierre bajo la MM30 descendente"},
         ],
         "trades": [
             {"date": "2026-11-17", "symbol": "EJEMPLO2", "side": "sell", "qty": 50, "price": 99.4},
@@ -68,9 +75,9 @@ def main():
             "reason_counts": {"no está en Fase 2": 301, "sin ruptura de resistencia en las últimas 6 semanas": 198,
                               "fuerza relativa de Mansfield negativa": 82},
             "europe_signals": [
-                {"symbol": "EJEMPLO.DE", "entry": 105.04, "stop": 92.22, "mrs": 24.5},
-                {"symbol": "EJEMPLO.PA", "entry": 48.68, "stop": 42.9, "mrs": 12.3},
-                {"symbol": "EJEMPLO.MC", "entry": 17.35, "stop": 15.6, "mrs": 8.9},
+                {"symbol": "EJEMPLO.DE", "entry": 105.04, "stop": 92.22, "mrs": 24.5, "currency": "€"},
+                {"symbol": "EJEMPLO.L", "entry": 486.8, "stop": 429.0, "mrs": 12.3, "currency": "p"},
+                {"symbol": "EJEMPLO.SW", "entry": 173.5, "stop": 156.0, "mrs": 8.9, "currency": "CHF"},
             ],
         },
     }

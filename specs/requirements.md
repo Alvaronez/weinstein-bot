@@ -86,7 +86,7 @@ El bot no se adelanta a la ruptura: compra cuando ya está confirmada y en su re
 - **R-W1** La web DEBE mostrar la rentabilidad acumulada desde la puesta en marcha del bot, el patrimonio con la liquidez y, con al menos 90 días de datos, el CAGR (rentabilidad anualizada) junto al del S&P 500.
 - **R-W2** La web DEBE mostrar el alfa frente al S&P 500 como exceso de rentabilidad acumulada.
 - **R-W3** La web DEBE mostrar la curva de patrimonio del bot y la del S&P 500 en base 100 sobre un mismo eje.
-- **R-W4** La web DEBE mostrar las órdenes colocadas (entradas pendientes y stops), con tipo, precios y motivo.
+- **R-W4** La web DEBE mostrar las órdenes colocadas con tres columnas: valor, orden y motivo. Los tipos de orden son: compra tras ruptura confirmada, compra en retroceso, stop de pérdidas, venta parcial y salida total. Las compras y los stops DEBEN indicar su precio en la divisa del activo; un stop que se ha movido DEBE indicar el nivel anterior y el nuevo; una venta parcial DEBE indicar el porcentaje de la posición que se vende.
 - **R-W5** La web DEBE mostrar las posiciones abiertas con su fase y stop, las decisiones de la semana, las órdenes descartadas con su motivo y las señales europeas.
 - **R-W6** La web DEBE ser estática y regenerarse en cada ejecución.
 

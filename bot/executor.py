@@ -5,7 +5,7 @@ import uuid
 from pathlib import Path
 
 from . import strategy
-from .broker import BrokerError, to_alpaca, to_yahoo
+from .broker import BrokerError, currency, to_alpaca, to_yahoo
 
 PREFIX = "wb"
 
@@ -134,13 +134,19 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
                                   "detail": f"sin datos esta semana; {note}"})
                 continue
             d = strategy.manage(w, st, cfg)
+            before = st["stop"]
             st["flags"], st["stop"] = d["flags"], d["stop"]
+            st.pop("stop_moved", None)
+            st.pop("last_sale", None)
+            if before is not None and d["stop"] != before:
+                st["stop_moved"] = [before, d["stop"]]
             st["stage"] = int(w["stage"].iloc[-1])
             why = "; ".join(d["reasons"])
             if d["action"] == "exit":
                 _cancel_sells(broker, sym, orders)
                 _sell_market(broker, sym, p["qty"], "exit")
                 exiting.add(sym)
+                st["last_sale"] = {"pct": 100, "reason": why}
                 decisions.append({"symbol": sym, "action": "Salida total", "detail": why})
                 continue
             n = 0
@@ -155,6 +161,7 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
                 else:
                     _sell_market(broker, sym, rest, "exit")
                     exiting.add(sym)
+                st["last_sale"] = {"pct": round(n / p["qty"] * 100), "reason": why}
                 decisions.append({"symbol": sym, "action": f"Reducir {d['fraction']:.0%}",
                                   "detail": f"venta de {n:g} títulos: {why}"})
             else:
@@ -177,7 +184,8 @@ def weekly_cycle(broker, analyzed: dict, markets: dict, cfg: dict, state: dict, 
         except Exception as exc:
             setup, reason, near = None, f"error: {exc}", False
         if setup:
-            setups.append({"symbol": to_alpaca(ysym), "market": markets[ysym], **setup})
+            setups.append({"symbol": to_alpaca(ysym) if markets[ysym] == "US" else ysym,
+                           "market": markets[ysym], "currency": currency(ysym), **setup})
         elif near:
             rejected.append({"symbol": to_alpaca(ysym), "market": markets[ysym], "reason": reason})
         else:

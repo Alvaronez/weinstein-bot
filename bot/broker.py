@@ -21,6 +21,16 @@ def to_yahoo(sym: str) -> str:
     return sym.replace(".", "-")
 
 
+CURRENCY = {"L": "p", "SW": "CHF", "CO": "DKK", "ST": "SEK", "OL": "NOK"}   # resto de Europa: €
+
+
+def currency(sym: str) -> str:
+    """Divisa en la que cotiza un ticker de Yahoo. Londres cotiza en peniques."""
+    if "." not in sym:
+        return "$"
+    return CURRENCY.get(sym.rsplit(".", 1)[1], "€")
+
+
 def _f(x):
     return None if x in (None, "") else float(x)
 

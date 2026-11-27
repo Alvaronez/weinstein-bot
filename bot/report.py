@@ -61,18 +61,36 @@ def performance(equity: pd.DataFrame, spy: pd.Series) -> dict:
     }
 
 
+def money(x: float, cur: str = "$") -> str:
+    """12345.6 → '12.345,60 $' (formato español, divisa del activo)."""
+    txt = f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+    return f"{txt} {cur}"
+
+
 def _order_row(o: dict, state: dict) -> dict:
-    sym = o["symbol"]
+    """Texto de la orden y su motivo. Alpaca solo opera EE. UU.: los precios van en dólares."""
+    sym, cid = o["symbol"], o["client_order_id"]
+    st = state["positions"].get(sym, {})
     if o["side"] == "buy":
-        kind = "Compra en retroceso" if "-entp-" in o["client_order_id"] else "Compra tras ruptura confirmada"
+        name = "Compra en retroceso" if "-entp-" in cid else "Compra tras ruptura confirmada"
+        kind = f"{name} a {money(o['limit_price'])}"
         reason = state["pending"].get(sym, {}).get("reason", "")
     elif o["type"] == "stop":
-        kind = "Stop de pérdidas"
-        reason = ("Se activará si la compra se ejecuta" if o["status"] == "held"
-                  else "Protege la posición abierta")
+        kind = f"Stop de pérdidas en {money(o['stop_price'])}"
+        moved = st.get("stop_moved")
+        if o["status"] == "held":
+            reason = "Se activará si la compra se ejecuta"
+        elif moved:
+            reason = f"Stop subido de {money(moved[0])} a {money(moved[1])}"
+        else:
+            reason = "Protege la posición abierta"
     else:
-        kind = "Venta a mercado"
-        reason = "Reducción o salida decidida el fin de semana"
+        sale = st.get("last_sale")
+        if "-red-" in cid:
+            kind = f"Venta parcial ({sale['pct']} % de la posición)" if sale else "Venta parcial"
+        else:
+            kind = "Salida total"
+        reason = sale["reason"] if sale else "Precio por debajo del stop"
     return {"symbol": sym, "kind": kind, "side": o["side"], "qty": o["qty"],
             "stop_price": o["stop_price"], "limit_price": o["limit_price"],
             "status": o["status"], "tif": o["time_in_force"], "reason": reason}
