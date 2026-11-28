@@ -1,9 +1,9 @@
 {
- "updated": "2026-11-27 03:46 UTC",
+ "updated": "2026-11-28 03:30 UTC",
  "cash": 100000.0,
  "summary": {
   "start_date": "2026-11-27",
-  "last_date": "2026-11-27",
+  "last_date": "2026-11-28",
   "equity": 100000.0,
   "start_equity": 100000.0,
   "return_pct": 0.0,
@@ -13,12 +13,17 @@
   "beta": null,
   "cagr_pct": null,
   "spy_cagr_pct": null,
-  "days": 0,
-  "weeks": 0
+  "days": 1,
+  "weeks": 1
  },
  "curve": [
   {
    "d": "2026-11-27",
+   "bot": 100.0,
+   "spy": 100.0
+  },
+  {
+   "d": "2026-11-28",
    "bot": 100.0,
    "spy": 100.0
   }
